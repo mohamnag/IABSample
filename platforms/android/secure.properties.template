@@ -1,0 +1,4 @@
+key.store=/path/to/your/key/store
+key.alias=your_key_alias
+key.store.password=yourKeystorePassword
+key.alias.password=yourAliasPassword
