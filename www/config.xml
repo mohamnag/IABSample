@@ -51,6 +51,7 @@
         <gap:plugin name="Example" />
         A list of available plugins are available at https://build.phonegap.com/docs/plugins
     -->
+    <gap:plugin name="com.mohamnag.inappbilling" version="0.0.1" />
 
     <!-- Define app icon for each platform. -->
     <icon src="icon.png" />
