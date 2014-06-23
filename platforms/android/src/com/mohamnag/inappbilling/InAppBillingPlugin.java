@@ -322,6 +322,8 @@ public class InAppBillingPlugin extends CordovaPlugin {
     private void buy(final String productId, final String payload, final CallbackContext callbackContext) {
         jsLog("buy called for productId: " + productId + " payload: " + payload);
 
+        // TODO: we have to check if to-be-purchased product is already loaded or not.
+
         this.cordova.setActivityResultCallback(this);
 
         // we create one listener for each purchase request, this guarnatiees 

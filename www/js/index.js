@@ -82,58 +82,33 @@
     loadProds: function() {
         inappbilling.getAvailableProducts(
             function(prods) {
-                console.log(prods);
-                document.getElementById('output').innerHTML = JSON.stringify(prods);
+                app.log(prods);
             },
             function(err) {
-                console.log(err);
+                app.log(err);
             }
-            );
-    },
-    buyProd: function() {
-        inappbilling.buy(
-            function(data) {
-                document.getElementById('output').innerHTML = 'succeed buying: ' + data;
-                console.log(data);
-            },
-            function(err) {
-                document.getElementById('output').innerHTML = 'failed buying: ' + err;
-                console.log(err);
-            },
-            'android.test.purchased'
-            );
-    },
-    consProd: function() {
-        inappbilling.consumePurchase(
-            function(data) {
-                document.getElementById('output').innerHTML = 'succeed buying: ' + data;
-            },
-            function(err) {
-                document.getElementById('output').innerHTML = 'failed buying: ' + err;
-            },
-            'android.test.purchased'
-            );
+        );
     },
     buyRealProd: function() {
         inappbilling.buy(
             function(data) {
-                document.getElementById('output').innerHTML = 'succeed buying: ' + data;
+                app.log('succeed buying: ' + data);
             },
             function(err) {
-                document.getElementById('output').innerHTML = 'failed buying: ' + err;
+                app.log('failed buying: ' + err);
             },
             'test_product_1'
-            );
+        );
     },
     consRealProd: function() {
         inappbilling.consumePurchase(
             function(data) {
-                document.getElementById('output').innerHTML = 'succeed buying: ' + data;
+                app.log('succeed buying: ' + data);
             },
             function(err) {
-                document.getElementById('output').innerHTML = 'failed buying: ' + err;
+                app.log('failed buying: ' + err);
             },
             'test_product_1'
-            );
+        );
     }
 };

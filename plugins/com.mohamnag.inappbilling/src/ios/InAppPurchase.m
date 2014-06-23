@@ -47,6 +47,8 @@
 #define ERR_SUBSCRIPTION_NOT_SUPPORTED  (ERROR_CODES_BASE + 18)
 #define ERR_CONSUME_NOT_OWNED_ITEM      (ERROR_CODES_BASE + 19)
 #define ERR_CONSUMPTION_FAILED          (ERROR_CODES_BASE + 20)
+// the prduct to be bought is not loaded
+#define ERR_PRODUCT_NOT_LOADED          (ERROR_CODES_BASE + 21)
 
 
 
@@ -199,75 +201,105 @@ static NSString *jsErrorCodeAsString(NSInteger code) {
 }
 
 // this initiates the plugin
-// TODO: get an optional list of productIds and pass it further to be loaded
+// TODO: get an optional list of productIds and pass it further to be loaded in getProductDetails
 -(void) init: (CDVInvokedUrlCommand*)command {
-    [self jsLog:@"init called"];
+  [self jsLog:@"init called"];
 
-    if (![SKPaymentQueue canMakePayments]) {
-      [self jsLog:@"Cant make payments, init failed"];
+  if (![SKPaymentQueue canMakePayments]) {
+    [self jsLog:@"Cant make payments, init failed"];
 
-      [self sendError:[NSNumber numberWithInt:ERR_SETUP] 
-        withMsg:@"Can not make payment according to payment queue" withNativeEvent:nil forCommand:command];
-    }
-    else {
-      self.list = [[NSMutableDictionary alloc] init];
-      self.retainer = [[NSMutableDictionary alloc] init];
-      unfinishedTransactions = [[NSMutableDictionary alloc] init];
-      [[SKPaymentQueue defaultQueue] addTransactionObserver:self];
+    [self sendError:[NSNumber numberWithInt:ERR_SETUP] 
+      withMsg:@"Can not make payment according to payment queue" withNativeEvent:nil forCommand:command];
+  }
+  else {
+    self.list = [[NSMutableDictionary alloc] init];
+    self.retainer = [[NSMutableDictionary alloc] init];
+    unfinishedTransactions = [[NSMutableDictionary alloc] init];
+    [[SKPaymentQueue defaultQueue] addTransactionObserver:self];
 
-      [self jsLog:@"InAppPurchase initialized"];
+    [self jsLog:@"InAppBilling initialized successfully"];
 
-      CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-      [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];      
-    }
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];      
+  }
 
 }
 
 // this is renamed from original appStoreReceipt, I'm not sure if that provides the type of data we want for getPurchases.
+/* 
+    TODO: find/implement the right thing for iOS
+    I dont think this function matches the InAppPurchase.prototype.loadReceipts one. as that function
+    only tries to get receipt either from locally stored ones or from a URL.
+    we need probably something to refresh the receipt like SKReceiptRefreshRequest from 
+    https://developer.apple.com/library/ios/documentation/NetworkingInternet/Conceptual/StoreKitGuide/Chapters/Restoring.html#//apple_ref/doc/uid/TP40008267-CH8-SW9
+*/
 - (void) getPurchases: (CDVInvokedUrlCommand*)command {
-    [self jsLog:@"init called"];
+  [self jsLog:@"getPurchases called"];
 
-    NSString *base64 = nil;
-    NSData *receiptData = [self appStoreReceipt];
-    if (receiptData != nil) {
-        [self jsLog:@"receipt retrieved successfully!"];
-        base64 = [receiptData convertToBase64];
+  NSString *base64 = nil;
+  NSData *receiptData = [self appStoreReceipt];
+  if (receiptData != nil) {
+      [self jsLog:@"receipt retrieved successfully!"];
+      base64 = [receiptData convertToBase64];
 
-        // TODO: this structure shall be synced with android for the type (in JS) InAppBilling.purchase
-        CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
-                                                          messageAsString:base64];
-        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-    }
-    else {
-      [self sendError:[NSNumber numberWithInt:ERR_LOAD_RECEIPTS]
-        withMsg:@"Failed loading receipts" withNativeEvent:nil forCommand:command];
-    }
+      // TODO: this structure shall be synced with android for the type (in JS) InAppBilling.purchase
+      CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
+                                                        messageAsString:base64];
+      [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+  }
+  else {
+    [self sendError:[NSNumber numberWithInt:ERR_LOAD_RECEIPTS]
+      withMsg:@"Failed loading receipts, data is nil" withNativeEvent:nil forCommand:command];
+  }
 }
 
-- (NSData *)appStoreReceipt
-{
-    NSURL *receiptURL = nil;
-    NSBundle *bundle = [NSBundle mainBundle];
-    if ([bundle respondsToSelector:@selector(appStoreReceiptURL)]) {
-        // The general best practice of weak linking using the respondsToSelector: method
-        // cannot be used here. Prior to iOS 7, the method was implemented as private SPI,
-        // but that implementation called the doesNotRecognizeSelector: method.
-        if (floor(NSFoundationVersionNumber) > NSFoundationVersionNumber_iOS_6_1) {
-            receiptURL = [bundle performSelector:@selector(appStoreReceiptURL)];
-        }
-    }
+- (NSData *)appStoreReceipt {
+  NSURL *receiptURL = nil;
+  NSBundle *bundle = [NSBundle mainBundle];
+  if ([bundle respondsToSelector:@selector(appStoreReceiptURL)]) {
+      // The general best practice of weak linking using the respondsToSelector: method
+      // cannot be used here. Prior to iOS 7, the method was implemented as private SPI,
+      // but that implementation called the doesNotRecognizeSelector: method.
+      if (floor(NSFoundationVersionNumber) > NSFoundationVersionNumber_iOS_6_1) {
+          receiptURL = [bundle performSelector:@selector(appStoreReceiptURL)];
+      }
+  }
 
-    if (receiptURL != nil) {
-        NSData *receiptData = [NSData dataWithContentsOfURL:receiptURL];
+  if (receiptURL != nil) {
+      NSData *receiptData = [NSData dataWithContentsOfURL:receiptURL];
 #if ARC_DISABLED
-        [receiptData autorelease];
+      [receiptData autorelease];
 #endif
-        return receiptData;
-    }
-    else {
-        return nil;
-    }
+      return receiptData;
+  }
+  else {
+      return nil;
+  }
 }
+
+- (void) buy: (CDVInvokedUrlCommand*)command {
+  id identifier = [command.arguments objectAtIndex:0];
+
+  [self jsLog:[NSString stringWithFormat:@"buy called for productId: %@", identifier]];
+
+  id productObject = [self.list objectForKey:identifier];
+
+  if(productObject == nil) {
+    [self sendError:[NSNumber numberWithInt:ERR_PRODUCT_NOT_LOADED] 
+      withMsg:@"The product to be bought has not been loaded before" withNativeEvent:nil forCommand:command];
+  }
+  else {
+    // TODO: can I somehow overwrite the SKMutablePayment and add my command to it?
+    SKMutablePayment *payment = [SKMutablePayment paymentWithProduct:productObject];
+    // we hardcode the quantity to one to match the functionality of android
+    payment.quantity = 1;
+
+    [[SKPaymentQueue defaultQueue] addPayment:payment];
+  }
+}
+
+
+
 
 
 
@@ -328,18 +360,6 @@ static NSString *jsErrorCodeAsString(NSInteger code) {
     DLog(@"Product request started");
 }
 
-- (void) purchase: (CDVInvokedUrlCommand*)command
-{
-	DLog(@"About to do IAP");
-    id identifier = [command.arguments objectAtIndex:0];
-    id quantity =   [command.arguments objectAtIndex:1];
-
-    SKMutablePayment *payment = [SKMutablePayment paymentWithProduct:[self.list objectForKey:identifier]];
-    if ([quantity respondsToSelector:@selector(integerValue)]) {
-        payment.quantity = [quantity integerValue];
-    }
-	[[SKPaymentQueue defaultQueue] addPayment:payment];
-}
 
 - (void) restoreCompletedTransactions: (CDVInvokedUrlCommand*)command
 {

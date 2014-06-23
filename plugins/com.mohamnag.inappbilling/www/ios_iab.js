@@ -144,44 +144,20 @@ InAppBilling.prototype.init = function (success, fail, options, skus) {
  * @param {errorCallback} fail
  */
 InAppBilling.prototype.getPurchases = function (success, fail) {
-    /* 
-        TODO: find/implement the right thing for iOS
-        I dont think this function matches the InAppPurchase.prototype.loadReceipts one. as that function
-        only tries to get receipt either from locally stored ones or from a URL.
-        we need probably something to refresh the receipt like SKReceiptRefreshRequest from 
-        https://developer.apple.com/library/ios/documentation/NetworkingInternet/Conceptual/StoreKitGuide/Chapters/Restoring.html#//apple_ref/doc/uid/TP40008267-CH8-SW9
-    */
     this.log('getPurchases called!');
     
-    var loaded = function (base64Receipt) {
-        protectCall(success, 'loadReceipts.callback', base64Receipt);
-    };
-
-    var _that = this;
-    var error = function (errMessage) {
-        var msg = 'Failed to load receipt: ' + errMessage;
-        _that.log(msg);
-        protectCall(fail, 'options.error', InAppBilling.prototype.ERR_LOAD_RECEIPTS, msg);
-    };
-
     cordova.exec(success, fail, "InAppPurchase", 'getPurchases', []);    
 };
 
 // Merged with InAppPurchase.prototype.purchase
 //TODO: sync fail and success callback params with android interface
 InAppBilling.prototype.buy = function (success, fail, productId) {
-
     this.log('buy called!');
 
-    // Many people forget to load information about their products from apple's servers before allowing
-    // users to purchase them... leading them to spam us with useless issues and comments.
-    // Let's chase them down!
-    _that = this;
-    if ((!InAppBilling._productIds) || (InAppBilling._productIds.indexOf(productId) < 0)) {
-        _that.log('Purchasing ' + productId + ' failed.  Ensure the product was loaded first!');
-        protectCall(fail, 'options.error', 'Trying to purchase an unknown product.', productId);
-        return;
-    }
+    cordova.exec(success, fail, "InAppPurchase", 'buy', [productId]);
+
+    return;
+
 
     // after we call the native code, we have a queue and we dont really know how to map callbacks to items 
     // on the queue, for this reason we serialize the callbacks and put it together with productId on a cache.

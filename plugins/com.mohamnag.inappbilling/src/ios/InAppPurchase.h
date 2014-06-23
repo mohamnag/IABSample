@@ -24,10 +24,10 @@
 
 - (void) init: (CDVInvokedUrlCommand*)command;
 - (void) getPurchases: (CDVInvokedUrlCommand*)command;
+- (void) buy: (CDVInvokedUrlCommand*)command;
 
 
 - (void) load: (CDVInvokedUrlCommand*)command;
-- (void) purchase: (CDVInvokedUrlCommand*)command;
 - (void) paymentQueue:(SKPaymentQueue *)queue updatedTransactions:(NSArray *)transactions;
 - (void) paymentQueue:(SKPaymentQueue *)queue restoreCompletedTransactionsFailedWithError:(NSError *)error;
 - (void) paymentQueueRestoreCompletedTransactionsFinished:(SKPaymentQueue *)queue;

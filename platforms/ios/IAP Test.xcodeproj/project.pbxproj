@@ -38,9 +38,9 @@
 		7E7966E61810823500FA85AD /* icon-small.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E7966DC1810823500FA85AD /* icon-small.png */; };
 		7E7966E71810823500FA85AD /* icon-small@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E7966DD1810823500FA85AD /* icon-small@2x.png */; };
 		D4A0D8761607E02300AEF8BB /* Default-568h@2x~iphone.png in Resources */ = {isa = PBXBuildFile; fileRef = D4A0D8751607E02300AEF8BB /* Default-568h@2x~iphone.png */; };
-		5152E1D71BE945B9A8C959D3 /* InAppPurchase.m in Sources */ = {isa = PBXBuildFile; fileRef = 8CB654B0EE9C4B10A1664915 /* InAppPurchase.m */; };
-		61D7AAF658674743B7E89437 /* SKProduct+LocalizedPrice.m in Sources */ = {isa = PBXBuildFile; fileRef = 7A93F79438204AE791C0CF6E /* SKProduct+LocalizedPrice.m */; };
-		C3F23BA6CFB84E829482B932 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED687AD23CE3450DAD39AF22 /* StoreKit.framework */; };
+		1DA9E7EAA52C49BD9EF934EF /* InAppPurchase.m in Sources */ = {isa = PBXBuildFile; fileRef = FBECDB5BA6AD423C984C83ED /* InAppPurchase.m */; };
+		A8D5778FA5F3424087DECD9D /* SKProduct+LocalizedPrice.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BE80BA38C69429A8A87CAA8 /* SKProduct+LocalizedPrice.m */; };
+		B08F6A7853734F0694F25033 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 95D4ACEE36FA400EA304C156 /* StoreKit.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -105,11 +105,11 @@
 		EB87FDF31871DA8E0020F90C /* www */ = {isa = PBXFileReference; lastKnownFileType = folder; name = www; path = ../../www; sourceTree = "<group>"; };
 		EB87FDF41871DAF40020F90C /* config.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = config.xml; path = ../../config.xml; sourceTree = "<group>"; };
 		F840E1F0165FE0F500CFE078 /* config.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = config.xml; path = "IAP Test/config.xml"; sourceTree = "<group>"; };
-		8CB654B0EE9C4B10A1664915 /* InAppPurchase.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "InAppPurchase.m"; path = "com.mohamnag.inappbilling/InAppPurchase.m"; sourceTree = "<group>"; fileEncoding = 4; };
-		7A93F79438204AE791C0CF6E /* SKProduct+LocalizedPrice.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "SKProduct+LocalizedPrice.m"; path = "com.mohamnag.inappbilling/SKProduct+LocalizedPrice.m"; sourceTree = "<group>"; fileEncoding = 4; };
-		B5AE9E3066B141F8A4740AE7 /* InAppPurchase.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "InAppPurchase.h"; path = "com.mohamnag.inappbilling/InAppPurchase.h"; sourceTree = "<group>"; fileEncoding = 4; };
-		D72BBCE84EDB455798C1CBC5 /* SKProduct+LocalizedPrice.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "SKProduct+LocalizedPrice.h"; path = "com.mohamnag.inappbilling/SKProduct+LocalizedPrice.h"; sourceTree = "<group>"; fileEncoding = 4; };
-		ED687AD23CE3450DAD39AF22 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = "StoreKit.framework"; path = "System/Library/Frameworks/StoreKit.framework"; sourceTree = SDKROOT; fileEncoding = 4; };
+		FBECDB5BA6AD423C984C83ED /* InAppPurchase.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "InAppPurchase.m"; path = "com.mohamnag.inappbilling/InAppPurchase.m"; sourceTree = "<group>"; fileEncoding = 4; };
+		1BE80BA38C69429A8A87CAA8 /* SKProduct+LocalizedPrice.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "SKProduct+LocalizedPrice.m"; path = "com.mohamnag.inappbilling/SKProduct+LocalizedPrice.m"; sourceTree = "<group>"; fileEncoding = 4; };
+		F3FB50B3425C4102A6DB40C3 /* InAppPurchase.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "InAppPurchase.h"; path = "com.mohamnag.inappbilling/InAppPurchase.h"; sourceTree = "<group>"; fileEncoding = 4; };
+		557023E2326B4611B43871B6 /* SKProduct+LocalizedPrice.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "SKProduct+LocalizedPrice.h"; path = "com.mohamnag.inappbilling/SKProduct+LocalizedPrice.h"; sourceTree = "<group>"; fileEncoding = 4; };
+		95D4ACEE36FA400EA304C156 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = "StoreKit.framework"; path = "System/Library/Frameworks/StoreKit.framework"; sourceTree = SDKROOT; fileEncoding = 4; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -122,7 +122,7 @@
 				288765FD0DF74451002DB57D /* CoreGraphics.framework in Frameworks */,
 				305D5FD1115AB8F900A74A75 /* MobileCoreServices.framework in Frameworks */,
 				5AEE5B35173C68D80009041E /* CoreLocation.framework in Frameworks */,
-				C3F23BA6CFB84E829482B932 /* StoreKit.framework in Frameworks */,
+				B08F6A7853734F0694F25033 /* StoreKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -216,7 +216,7 @@
 				5B1594DC16A7569C00FEF299 /* AssetsLibrary.framework */,
 				288765FC0DF74451002DB57D /* CoreGraphics.framework */,
 				305D5FD0115AB8F900A74A75 /* MobileCoreServices.framework */,
-				ED687AD23CE3450DAD39AF22 /* StoreKit.framework */,
+				95D4ACEE36FA400EA304C156 /* StoreKit.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -232,10 +232,10 @@
 		307C750510C5A3420062BCA9 /* Plugins */ = {
 			isa = PBXGroup;
 			children = (
-				8CB654B0EE9C4B10A1664915 /* InAppPurchase.m */,
-				7A93F79438204AE791C0CF6E /* SKProduct+LocalizedPrice.m */,
-				B5AE9E3066B141F8A4740AE7 /* InAppPurchase.h */,
-				D72BBCE84EDB455798C1CBC5 /* SKProduct+LocalizedPrice.h */,
+				FBECDB5BA6AD423C984C83ED /* InAppPurchase.m */,
+				1BE80BA38C69429A8A87CAA8 /* SKProduct+LocalizedPrice.m */,
+				F3FB50B3425C4102A6DB40C3 /* InAppPurchase.h */,
+				557023E2326B4611B43871B6 /* SKProduct+LocalizedPrice.h */,
 			);
 			name = Plugins;
 			path = "IAP Test/Plugins";
@@ -430,8 +430,8 @@
 				1D60589B0D05DD56006BFB54 /* main.m in Sources */,
 				1D3623260D0F684500981E51 /* AppDelegate.m in Sources */,
 				302D95F114D2391D003F00A1 /* MainViewController.m in Sources */,
-				5152E1D71BE945B9A8C959D3 /* InAppPurchase.m in Sources */,
-				61D7AAF658674743B7E89437 /* SKProduct+LocalizedPrice.m in Sources */,
+				1DA9E7EAA52C49BD9EF934EF /* InAppPurchase.m in Sources */,
+				A8D5778FA5F3424087DECD9D /* SKProduct+LocalizedPrice.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
