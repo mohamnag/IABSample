@@ -46,56 +46,58 @@
 
         console.log('Received Event: ' + id);
     },
-    log: function(msg) {
-        console.log(msg);
-        document.getElementById('output').innerHTML = msg;
+    log: function(msg, data) {
+        console.log('IABSample: ' + msg);
+        !!data && console.log(data);
+
+        document.getElementById('output').innerHTML = msg + '<hl/>' + JSON.stringify(data);
     },
     initIab: function() {
         inappbilling.init(
-          function() {
-            app.receivedEvent('inappbillingready');
-            app.log('init succeed');
-          },
-          function(err) {
-            app.log(err);
-          },
-          {
-            showLog: true
-          },
-          [
-            "test_product_1",
-            "test_product_2"
-          ]
+            function() {
+                app.receivedEvent('inappbillingready');
+                app.log('init succeed');
+            },
+            function(err) {
+                app.log('init failed', err);
+            },
+            {
+                showLog: true
+            },
+            [
+                "test_product_1",
+                "test_product_2"
+            ]
         );
         
     },
     getPurchases: function() {
         inappbilling.getPurchases(
             function(purchases) {
-                app.log(pruchases);
+                app.log('get purchases succeed', pruchases);
             },
             function(err) {
-                app.log(err);
+                app.log('get purchases failed', err);
             }
         );
     },
     loadProds: function() {
         inappbilling.getAvailableProducts(
             function(prods) {
-                app.log(prods);
+                app.log('load products succeed', prods);
             },
             function(err) {
-                app.log(err);
+                app.log('load product failed', err);
             }
         );
     },
     buyRealProd: function() {
         inappbilling.buy(
             function(data) {
-                app.log('succeed buying: ' + data);
+                app.log('succeed buying "test_product_1"', data);
             },
             function(err) {
-                app.log('failed buying: ' + err);
+                app.log('failed buying "test_product_1"', err);
             },
             'test_product_1'
         );
@@ -103,10 +105,10 @@
     consRealProd: function() {
         inappbilling.consumePurchase(
             function(data) {
-                app.log('succeed buying: ' + data);
+                app.log('succeed consuming "test_product_1"', data);
             },
             function(err) {
-                app.log('failed buying: ' + err);
+                app.log('failed consuming "test_product_1"', err);
             },
             'test_product_1'
         );

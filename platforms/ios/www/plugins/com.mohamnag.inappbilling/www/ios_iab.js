@@ -113,11 +113,8 @@ InAppBilling.prototype.init = function (success, fail, options, skus) {
     //TODO: match the arguments passed to success and fail callbacks with andorid
 
     // show log or mute the log
-    //TODO: this shall be applied to android too
-    if (this.options.showLog) {
-        cordova.exec(noop, noop, "InAppPurchase", 'debug', []);
-    }
-    else {
+    //TODO: this shall mute logs on native too
+    if (!this.options.showLog) {
         this.log = noop;
     }
 
