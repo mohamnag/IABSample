@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-var app = {
+ var app = {
     // Application Constructor
     initialize: function() {
         this.bindEvents();
@@ -34,24 +34,6 @@ var app = {
     // function, we must explicity call 'app.receivedEvent(...);'
     onDeviceReady: function() {
         app.receivedEvent('deviceready');
-
-        if (typeof(inappbilling) !== 'undefined') {
-            inappbilling.init(
-                    function() {
-                        app.receivedEvent('inappbillingready');
-                    },
-                    function(err) {
-                        document.getElementById('output').innerHTML = err;
-                    },
-                    {
-                        showLog: true
-                    },
-                    [
-                        "test_product_1",
-                        "test_product_2"
-                    ]
-            );
-        }
     },
     // Update DOM on a Received Event
     receivedEvent: function(id) {
@@ -64,61 +46,94 @@ var app = {
 
         console.log('Received Event: ' + id);
     },
+    log: function(msg) {
+        console.log(msg);
+        document.getElementById('output').innerHTML = msg;
+    },
+    initIab: function() {
+        inappbilling.init(
+          function() {
+            app.receivedEvent('inappbillingready');
+            app.log('init succeed');
+          },
+          function(err) {
+            app.log(err);
+          },
+          {
+            showLog: true
+          },
+          [
+            "test_product_1",
+            "test_product_2"
+          ]
+        );
+        
+    },
+    getPurchases: function() {
+        inappbilling.getPurchases(
+            function(purchases) {
+                app.log(pruchases);
+            },
+            function(err) {
+                app.log(err);
+            }
+        );
+    },
     loadProds: function() {
         inappbilling.getAvailableProducts(
-                function(prods) {
-                    console.log(prods);
-                    document.getElementById('output').innerHTML = JSON.stringify(prods);
-                },
-                function(err) {
-                    console.log(err);
-                }
-        );
+            function(prods) {
+                console.log(prods);
+                document.getElementById('output').innerHTML = JSON.stringify(prods);
+            },
+            function(err) {
+                console.log(err);
+            }
+            );
     },
     buyProd: function() {
         inappbilling.buy(
-                function(data) {
-                    document.getElementById('output').innerHTML = 'succeed buying: ' + data;
-                    console.log(data);
-                },
-                function(err) {
-                    document.getElementById('output').innerHTML = 'failed buying: ' + err;
-                    console.log(err);
-                },
-                'android.test.purchased'
-        );
+            function(data) {
+                document.getElementById('output').innerHTML = 'succeed buying: ' + data;
+                console.log(data);
+            },
+            function(err) {
+                document.getElementById('output').innerHTML = 'failed buying: ' + err;
+                console.log(err);
+            },
+            'android.test.purchased'
+            );
     },
     consProd: function() {
         inappbilling.consumePurchase(
-                function(data) {
-                    document.getElementById('output').innerHTML = 'succeed buying: ' + data;
-                },
-                function(err) {
-                    document.getElementById('output').innerHTML = 'failed buying: ' + err;
-                },
-                'android.test.purchased'
-        );
+            function(data) {
+                document.getElementById('output').innerHTML = 'succeed buying: ' + data;
+            },
+            function(err) {
+                document.getElementById('output').innerHTML = 'failed buying: ' + err;
+            },
+            'android.test.purchased'
+            );
     },
     buyRealProd: function() {
         inappbilling.buy(
-                function(data) {
-                    document.getElementById('output').innerHTML = 'succeed buying: ' + data;
-                },
-                function(err) {
-                    document.getElementById('output').innerHTML = 'failed buying: ' + err;
-                },
-                'test_product_1'
-        );
+            function(data) {
+                document.getElementById('output').innerHTML = 'succeed buying: ' + data;
+            },
+            function(err) {
+                document.getElementById('output').innerHTML = 'failed buying: ' + err;
+            },
+            'test_product_1'
+            );
     },
     consRealProd: function() {
         inappbilling.consumePurchase(
-                function(data) {
-                    document.getElementById('output').innerHTML = 'succeed buying: ' + data;
-                },
-                function(err) {
-                    document.getElementById('output').innerHTML = 'failed buying: ' + err;
-                },
-                'test_product_1'
-        );
+            function(data) {
+                document.getElementById('output').innerHTML = 'succeed buying: ' + data;
+            },
+            function(err) {
+                document.getElementById('output').innerHTML = 'failed buying: ' + err;
+            },
+            'test_product_1'
+            );
     }
 };

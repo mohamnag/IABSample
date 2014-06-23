@@ -24,6 +24,9 @@ cordova.define("com.mohamnag.inappbilling.InAppBilling", function(require, expor
  * @param {string}  error.nativeEvent.IabMessage    message text coming from IabHelper
  */
 
+var noop = function() {
+};
+
 /**
  * @constructor
  * @alias module:InAppBilling
@@ -46,27 +49,26 @@ var InAppBilling = function() {
  * 
  * @private
  */
-InAppBilling.prototype.ERROR_CODES_BASE = 4983497;
-
-InAppBilling.prototype.ERR_SETUP = InAppBilling.prototype.ERROR_CODES_BASE + 1;
-InAppBilling.prototype.ERR_LOAD = InAppBilling.prototype.ERROR_CODES_BASE + 2;
-InAppBilling.prototype.ERR_PURCHASE = InAppBilling.prototype.ERROR_CODES_BASE + 3;
-InAppBilling.prototype.ERR_LOAD_RECEIPTS = InAppBilling.prototype.ERROR_CODES_BASE + 4;
-InAppBilling.prototype.ERR_CLIENT_INVALID = InAppBilling.prototype.ERROR_CODES_BASE + 5;
-InAppBilling.prototype.ERR_PAYMENT_CANCELLED = InAppBilling.prototype.ERROR_CODES_BASE + 6;
-InAppBilling.prototype.ERR_PAYMENT_INVALID = InAppBilling.prototype.ERROR_CODES_BASE + 7;
-InAppBilling.prototype.ERR_PAYMENT_NOT_ALLOWED = InAppBilling.prototype.ERROR_CODES_BASE + 8;
-InAppBilling.prototype.ERR_UNKNOWN = InAppBilling.prototype.ERROR_CODES_BASE + 10;
-InAppBilling.prototype.ERR_LOAD_INVENTORY = InAppBilling.prototype.ERROR_CODES_BASE + 11;
-InAppBilling.prototype.ERR_HELPER_DISPOSED = InAppBilling.prototype.ERROR_CODES_BASE + 12;
-InAppBilling.prototype.ERR_NOT_INITIALIZED = InAppBilling.prototype.ERROR_CODES_BASE + 13;
-InAppBilling.prototype.ERR_INVENTORY_NOT_LOADED = InAppBilling.prototype.ERROR_CODES_BASE + 14;
-InAppBilling.prototype.ERR_PURCHASE_FAILED = InAppBilling.prototype.ERROR_CODES_BASE + 15;
-InAppBilling.prototype.ERR_JSON_CONVERSION_FAILED = InAppBilling.prototype.ERROR_CODES_BASE + 16;
-InAppBilling.prototype.ERR_INVALID_PURCHASE_PAYLOAD = InAppBilling.prototype.ERROR_CODES_BASE + 17;
-InAppBilling.prototype.ERR_SUBSCRIPTION_NOT_SUPPORTED = InAppBilling.prototype.ERROR_CODES_BASE + 18;
-InAppBilling.prototype.ERR_CONSUME_NOT_OWNED_ITEM = InAppBilling.prototype.ERROR_CODES_BASE + 19;
-InAppBilling.prototype.ERR_CONSUMPTION_FAILED = InAppBilling.prototype.ERROR_CODES_BASE + 20;
+ERROR_CODES_BASE = 4983497;
+InAppBilling.prototype.ERR_SETUP = ERROR_CODES_BASE + 1;
+InAppBilling.prototype.ERR_LOAD = ERROR_CODES_BASE + 2;
+InAppBilling.prototype.ERR_PURCHASE = ERROR_CODES_BASE + 3;
+InAppBilling.prototype.ERR_LOAD_RECEIPTS = ERROR_CODES_BASE + 4;
+InAppBilling.prototype.ERR_CLIENT_INVALID = ERROR_CODES_BASE + 5;
+InAppBilling.prototype.ERR_PAYMENT_CANCELLED = ERROR_CODES_BASE + 6;
+InAppBilling.prototype.ERR_PAYMENT_INVALID = ERROR_CODES_BASE + 7;
+InAppBilling.prototype.ERR_PAYMENT_NOT_ALLOWED = ERROR_CODES_BASE + 8;
+InAppBilling.prototype.ERR_UNKNOWN = ERROR_CODES_BASE + 10;
+InAppBilling.prototype.ERR_LOAD_INVENTORY = ERROR_CODES_BASE + 11;
+InAppBilling.prototype.ERR_HELPER_DISPOSED = ERROR_CODES_BASE + 12;
+InAppBilling.prototype.ERR_NOT_INITIALIZED = ERROR_CODES_BASE + 13;
+InAppBilling.prototype.ERR_INVENTORY_NOT_LOADED = ERROR_CODES_BASE + 14;
+InAppBilling.prototype.ERR_PURCHASE_FAILED = ERROR_CODES_BASE + 15;
+InAppBilling.prototype.ERR_JSON_CONVERSION_FAILED = ERROR_CODES_BASE + 16;
+InAppBilling.prototype.ERR_INVALID_PURCHASE_PAYLOAD = ERROR_CODES_BASE + 17;
+InAppBilling.prototype.ERR_SUBSCRIPTION_NOT_SUPPORTED = ERROR_CODES_BASE + 18;
+InAppBilling.prototype.ERR_CONSUME_NOT_OWNED_ITEM = ERROR_CODES_BASE + 19;
+InAppBilling.prototype.ERR_CONSUMPTION_FAILED = ERROR_CODES_BASE + 20;
 
 /**
  * This function accepts and outputs all the logs, both from native and from JS
@@ -103,9 +105,11 @@ InAppBilling.prototype.init = function(success, fail, options, productIds) {
         showLog: options.showLog || true
     };
 
-    if (this.options.showLog) {
-        this.log('setup ok');
+    if (!this.options.showLog) {
+        this.log = noop;
     }
+
+    this.log('setup ok');
 
     var hasProductIds = false;
     //Optional Load productIds to Inventory.
@@ -117,6 +121,7 @@ InAppBilling.prototype.init = function(success, fail, options, productIds) {
             if (typeof productIds[0] !== 'string') {
                 var msg = 'invalid productIds: ' + JSON.stringify(productIds);
                 this.log(msg);
+                //TODO: this does not match the errorCallback signature!    
                 fail(msg);
                 return;
             }
@@ -133,6 +138,11 @@ InAppBilling.prototype.init = function(success, fail, options, productIds) {
     }
 };
 
+//TODO: complete this and sync it with iOS
+/**
+ * @typedef {Object} purchase
+ */
+ 
 /**
  * The success callback for [getPurchases]{@link module:InAppBilling#getPurchases}
  * 
@@ -151,11 +161,6 @@ InAppBilling.prototype.getPurchases = function(success, fail) {
     this.log('getPurchases called!');
     return cordova.exec(success, fail, "InAppBillingPlugin", "getPurchases", ["null"]);
 };
-
-//TODO: complete this and sync it with iOS
-/**
- * @typedef {Object} purchase
- */
 
 /**
  * The success callback for [buy]{@link module:InAppBilling#buy} and 

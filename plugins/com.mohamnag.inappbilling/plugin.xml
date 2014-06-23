@@ -6,15 +6,17 @@
     id="com.mohamnag.inappbilling"
     version="0.0.1">
 
-    <name>InAppBilling</name>
+    <name>Multiplatform InAppBilling</name>
     <description>
-        Use this in-app Billing plugin to sell digital goods, including 
-        one-time items and recurring subscriptions from your Cordova 
-        application.
+        This plugin targets in app purchasing for PlayStore in-app billing 
+        API v3 and StoreKit on iOS >= 7 providing a unified JavaScript interface 
+        in order to make it possible having one JavaScript code which works with 
+        both stores.
 
-        More details and full documentation can be found on: https://github.com/mohamnag/InAppBilling/wiki
+        Refer to wiki (https://github.com/mohamnag/InAppBilling/wiki) for 
+        introduction and instructions on using this plugin.
     </description>
-    <license>MIT License</license>
+    <license>MIT</license>
     <keywords>billing,in-app,inapp,purchase,credit</keywords>
     <author>Mohammad Naghavi - mohamnag@gmail.com</author>
     

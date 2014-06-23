@@ -26,3 +26,5 @@ nbproject/
 ant-build/
 ant-gen/
 *~
+
+.DS_Store

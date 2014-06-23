@@ -1,18 +1,44 @@
 /**
  * In App Billing Plugin
+ * @module InAppBilling
  * 
- * Details and more information under: https://github.com/mohamnag/InAppBilling/wiki
+ * @overview This file implements a JavaScript interface for Android to the 
+ * native code. The signature of this interface has to match the one from iOS 
+ * in `android_iab.js`.
  * 
- * This file implements a JavaScript interface for iOS to the native code. 
- * The signature of this interface has to match the one from Android in 
- * `android_iab.js`.
+ * Details and more information on {@link module:InAppBilling}
+ * 
+ * @author Mohammad Naghavi - {@link mohamnag.com}
+ * @license MIT
  */
 
-
-/***
- * Error codes.
+/**
+ * All the failure callbacks have the same signature as this.
  * 
- * keep synchronized between: 
+ * @callback errorCallback
+ * @param {Object}  error   the information about the error
+ * @param {int}     error.errorCode one of the error codes defined with ERR_*
+ * @param {string}  error.msg   a textual message intended for developer in order to make debuging easier
+ * @param {Object}  error.nativeEvent additional    information mainly intended for debug process which will not be present if the source of error is not IAB
+ * @param {int}     error.nativeEvent.IabResponse   response code coming from IabHelper
+ * @param {string}  error.nativeEvent.IabMessage    message text coming from IabHelper
+ */
+
+var noop = function() {
+};
+
+/**
+ * @constructor
+ * @alias module:InAppBilling
+ */
+var InAppBilling = function() {
+    this.options = {};
+};
+
+/**
+ * Error codes base.
+ * 
+ * all the codes bellow should be kept synchronized between: 
  *  * InAppPurchase.m
  *  * InAppBillingPlugin.java 
  *  * android_iab.js 
@@ -20,9 +46,10 @@
  * 
  * Be carefull assiging new codes, these are meant to express the REASON of 
  * the error as exact as possible!
+ * 
+ * @private
  */
-InAppBilling.prototype.ERROR_CODES_BASE = 4983497;
-
+ERROR_CODES_BASE = 4983497;
 InAppBilling.prototype.ERR_SETUP = ERROR_CODES_BASE + 1;
 InAppBilling.prototype.ERR_LOAD = ERROR_CODES_BASE + 2;
 InAppBilling.prototype.ERR_PURCHASE = ERROR_CODES_BASE + 3;
@@ -43,10 +70,8 @@ InAppBilling.prototype.ERR_SUBSCRIPTION_NOT_SUPPORTED = ERROR_CODES_BASE + 18;
 InAppBilling.prototype.ERR_CONSUME_NOT_OWNED_ITEM = ERROR_CODES_BASE + 19;
 InAppBilling.prototype.ERR_CONSUMPTION_FAILED = ERROR_CODES_BASE + 20;
 
-// not sure if this is needed, if cordova callbacks can handle undefined, then this shall be removed!
-var noop = function() {};
 
-// this is protects us from exceptions in external codes
+// TODO: this shall be removed!
 var protectCall = function (callback, context) {
     try {
         var args = Array.prototype.slice.call(arguments, 2); 
@@ -57,68 +82,66 @@ var protectCall = function (callback, context) {
     }
 };
 
-var log = function (msg) {
+/**
+ * This function accepts and outputs all the logs, both from native and from JS
+ * this is intended to make the debuging easier, you only need to have access to 
+ * JS console output.
+ * 
+ * @param {String} msg
+ * @private
+ */
+InAppBilling.prototype.log = function (msg) {
     console.log("InAppBilling[js]: " + msg);
-};
-
-var InAppBilling = function () {
-    this.options = {};
 };
 
 // this stores purchases and their callbacks as long as they are on the queue
 InAppBilling.prototype._queuedPurchases = {};
+
 // this stores callbacks for restore function, until restore process is finished
 InAppBilling.prototype._restoreCallbacks = {}
 
-// Merged with InAppPurchase.prototype.init
-//TODO: load skus (productIds) if provided, after setup before success call
-//TODO: match the arguments passed to success and fail callbacks with andorid
+
 InAppBilling.prototype.init = function (success, fail, options, skus) {
+    this.log('init called!');
     options || (options = {});
 
     this.options = {
         showLog: options.showLog || true
     };
 
-    // maybe not needed any more, at best we would depend on storekit's functionality
-    // this.receiptForTransaction = {};
-    // this.receiptForProduct = {};
-    // if (window.localStorage && window.localStorage.sk_receiptForTransaction)
-    //     this.receiptForTransaction = JSON.parse(window.localStorage.sk_receiptForTransaction);
-    // if (window.localStorage && window.localStorage.sk_receiptForProduct)
-    //     this.receiptForProduct = JSON.parse(window.localStorage.sk_receiptForProduct);
+    //TODO: load skus (productIds) if provided, after setup before success call
+    //TODO: match the arguments passed to success and fail callbacks with andorid
 
     // show log or mute the log
+    //TODO: this shall be applied to android too
     if (this.options.showLog) {
         cordova.exec(noop, noop, "InAppPurchase", 'debug', []);
     }
     else {
-        log = noop;
+        this.log = noop;
     }
 
-    var setupOk = function () {
-        log('setup ok');
-        protectCall(success, 'options.ready');
-
-        // Is there a reason why we wouldn't like to do this automatically?
-        // YES! it does ask the user for his password.
-        // that.restore();
-    };
-
-    var setupFailed = function () {
-        log('setup failed');
-        protectCall(fail, 'options.error', InAppBilling.prototype.ERR_SETUP, 'Setup failed');
-    };
-
-    cordova.exec(setupOk, setupFailed, "InAppPurchase", 'setup', []);
+    cordova.exec(success, fail, "InAppPurchase", 'init', []);
 };
 
-/***
- * This will return all the receipts for already bought items.
+//TODO: complete this and sync it with iOS
+/**
+ * @typedef {Object} purchase
+ */
+
+/**
+ * The success callback for [getPurchases]{@link module:InAppBilling#getPurchases}
  * 
- * @param  {[type]} success
- * @param  {[type]} fail
- * @return {[type]}
+ * @callback getPurchasesSuccessCallback
+ * @param {Array.<purchase>} purchaseList
+ */
+
+/**
+ * This will return the already boutgh items. The consumed items will not be on
+ * this list, nor can be retrieved with any other method.
+ * 
+ * @param {getPurchasesSuccessCallback} success
+ * @param {errorCallback} fail
  */
 InAppBilling.prototype.getPurchases = function (success, fail) {
     /* 
@@ -128,35 +151,34 @@ InAppBilling.prototype.getPurchases = function (success, fail) {
         we need probably something to refresh the receipt like SKReceiptRefreshRequest from 
         https://developer.apple.com/library/ios/documentation/NetworkingInternet/Conceptual/StoreKitGuide/Chapters/Restoring.html#//apple_ref/doc/uid/TP40008267-CH8-SW9
     */
-    if (this.options.showLog) {
-        log('getPurchases called!');
-    }
+    this.log('getPurchases called!');
     
     var loaded = function (base64Receipt) {
         protectCall(success, 'loadReceipts.callback', base64Receipt);
     };
 
+    var _that = this;
     var error = function (errMessage) {
         var msg = 'Failed to load receipt: ' + errMessage;
-        log(msg);
+        _that.log(msg);
         protectCall(fail, 'options.error', InAppBilling.prototype.ERR_LOAD_RECEIPTS, msg);
     };
 
-    cordova.exec(loaded, error, "InAppPurchase", 'appStoreReceipt', []);    
+    cordova.exec(success, fail, "InAppPurchase", 'getPurchases', []);    
 };
 
 // Merged with InAppPurchase.prototype.purchase
 //TODO: sync fail and success callback params with android interface
 InAppBilling.prototype.buy = function (success, fail, productId) {
-    if (this.options.showLog) {
-        log('buy called!');
-    }
+
+    this.log('buy called!');
 
     // Many people forget to load information about their products from apple's servers before allowing
     // users to purchase them... leading them to spam us with useless issues and comments.
     // Let's chase them down!
+    _that = this;
     if ((!InAppBilling._productIds) || (InAppBilling._productIds.indexOf(productId) < 0)) {
-        log('Purchasing ' + productId + ' failed.  Ensure the product was loaded first!');
+        _that.log('Purchasing ' + productId + ' failed.  Ensure the product was loaded first!');
         protectCall(fail, 'options.error', 'Trying to purchase an unknown product.', productId);
         return;
     }
@@ -168,14 +190,14 @@ InAppBilling.prototype.buy = function (success, fail, productId) {
     //      is finished
     // IF you know a better way to attach these callbacks to this specific purchase, then help improve it!
     if(typeof InAppBilling._queuedPurchases.productId !== 'undefined') {
-        log(productId + ' is already on the purchase queue.');
+        this.log(productId + ' is already on the purchase queue.');
         protectCall(fail, 'options.error', InAppBilling.prototype.ERR_PURCHASE, productId);
         return;
     }
 
     // enqueued does not mean bought! here we shall keep success callback for later when transaction is updated
     var purchaseEnqueued = function () {
-        log('Purchase enqueued ' + productId);
+        _that.log('Purchase enqueued ' + productId);
         // here do nothing and keep the success callback for the time that queue is updated
         // we also have to keep the fail callback for queue update
         InAppBilling._queuedPurchases.productId = {
@@ -187,7 +209,7 @@ InAppBilling.prototype.buy = function (success, fail, productId) {
     // fail is fail, even not being able to put on queue! 
     var purchaseEnqueueFailed = function () {
         var msg = 'Enqueuing ' + productId + ' failed';
-        log(msg);
+        _that.log(msg);
         protectCall(fail, 'options.error', InAppBilling.prototype.ERR_PURCHASE, productId);
     };
 
@@ -196,9 +218,8 @@ InAppBilling.prototype.buy = function (success, fail, productId) {
 
 // on iOS, this does exactly what buy does!
 InAppBilling.prototype.subscribe = function (success, fail, productId) {
-    if (this.options.showLog) {
-        log('subscribe called!');
-    }
+    this.log('subscribe called!');
+
     return InAppBilling.buy(success, fail, productId);
 };
 
@@ -284,21 +305,22 @@ InAppBilling.prototype.getProductDetails = function (success, fail, productIds) 
     else {
         if (typeof productIds[0] !== 'string') {
             var msg = 'invalid productIds given to store.load: ' + JSON.stringify(productIds);
-            log(msg);
+            this.log(msg);
             protectCall(fail, 'options.error', InAppBilling.prototype.ERR_LOAD, msg);
             return;
         }
-        log('load ' + JSON.stringify(productIds));
+        this.log('load ' + JSON.stringify(productIds));
 
+        var _that = this;
         var loadOk = function (array) {
             var valid = array[0];
             var invalid = array[1];
-            log('load ok: { valid:' + JSON.stringify(valid) + ' invalid:' + JSON.stringify(invalid) + ' }');
+            _that.log('load ok: { valid:' + JSON.stringify(valid) + ' invalid:' + JSON.stringify(invalid) + ' }');
             protectCall(success, 'load.callback', valid, invalid);
         };
 
         var loadFailed = function (errMessage) {
-            log('load failed: ' + errMessage);
+            _that.log('load failed: ' + errMessage);
             protectCall(fail, 'options.error', InAppBilling.prototype.ERR_LOAD, 'Failed to load product data: ' + errMessage);
         };
 
@@ -361,9 +383,8 @@ InAppBilling.prototype.updatedTransactionCallback = function (state, errorCode, 
  * @return {[type]}
  */
 InAppBilling.prototype.consumePurchase = function (success, fail, productId) {
-    if (this.options.showLog) {
-        log('consumePurchase called!');
-    }
+    this.log('consumePurchase called!');
+
 
     //TODO: implement it for iOS!
     // return cordova.exec(success, fail, "InAppBillingPlugin", "consumePurchase", [productId]);
@@ -377,9 +398,8 @@ InAppBilling.prototype.consumePurchase = function (success, fail, productId) {
  * @return {[type]}
  */
 InAppBilling.prototype.getAvailableProducts = function (success, fail) {
-    if (this.options.showLog) {
-        log('getAvailableProducts called!');
-    }
+    this.log('getAvailableProducts called!');
+
 
     //TODO: implement this for iOS!
     // return cordova.exec(success, fail, "InAppBillingPlugin", "getAvailableProducts", ["null"]);
