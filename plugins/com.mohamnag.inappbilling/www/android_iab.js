@@ -35,7 +35,7 @@ var InAppBilling = function() {
     this.options = {};
 };
 
-/**
+/***
  * Error codes base.
  * 
  * all the codes bellow should be kept synchronized between: 
@@ -99,17 +99,18 @@ InAppBilling.prototype.log = function(msg) {
  * @param {{(String|Array.<String>)}} productIds   an optional list of product IDs to load after initialization was successful
  */
 InAppBilling.prototype.init = function(success, fail, options, productIds) {
+    this.log('init called!');    
     options || (options = {});
 
     this.options = {
         showLog: options.showLog || true
     };
 
+    // show log or mute the log
+    //TODO: this shall mute logs on native too
     if (!this.options.showLog) {
         this.log = noop;
     }
-
-    this.log('setup ok');
 
     var hasProductIds = false;
     //Optional Load productIds to Inventory.
@@ -142,7 +143,7 @@ InAppBilling.prototype.init = function(success, fail, options, productIds) {
 /**
  * @typedef {Object} purchase
  */
- 
+
 /**
  * The success callback for [getPurchases]{@link module:InAppBilling#getPurchases}
  * 
@@ -244,9 +245,13 @@ InAppBilling.prototype.getAvailableProducts = function(success, fail) {
 
 /**
  * This is the success callback for [getProductDetails]{@link module:InAppBilling#getProductDetails}.
+ * This will be called when process is successfully finished and will receive a list of valid and 
+ * loaded products.
+ *
+ * Invalid products will not be on this list.
  * 
  * @callback getProductDetailsSuccessCallback
- * @param {productDetails} product
+ * @param {Array.<productDetails>} products
  */
 
 /**
@@ -271,6 +276,7 @@ InAppBilling.prototype.getProductDetails = function(success, fail, productIds) {
         if (typeof productIds[0] !== 'string') {
             var msg = 'invalid productIds: ' + JSON.stringify(productIds);
             this.log(msg);
+            // TODO: this does not comply to our errorCallback signature
             fail(msg);
             return;
         }

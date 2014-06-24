@@ -43,8 +43,6 @@
 
         listeningElement.setAttribute('style', 'display:none;');
         receivedElement.setAttribute('style', 'display:block;');
-
-        console.log('Received Event: ' + id);
     },
     log: function(msg, data) {
         console.log('IABSample: ' + msg);

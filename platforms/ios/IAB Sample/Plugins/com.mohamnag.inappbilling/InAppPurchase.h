@@ -22,13 +22,15 @@
 @property (nonatomic,retain) NSMutableDictionary *list;
 @property (nonatomic,retain) NSMutableDictionary *retainer;
 
+
+- (void) jsLog: (NSString*)msg;
 - (void) init: (CDVInvokedUrlCommand*)command;
 - (void) getPurchases: (CDVInvokedUrlCommand*)command;
 - (void) buy: (CDVInvokedUrlCommand*)command;
-
-
-- (void) load: (CDVInvokedUrlCommand*)command;
 - (void) paymentQueue:(SKPaymentQueue *)queue updatedTransactions:(NSArray *)transactions;
+- (void) getProductDetails: (CDVInvokedUrlCommand*)command;
+
+
 - (void) paymentQueue:(SKPaymentQueue *)queue restoreCompletedTransactionsFailedWithError:(NSError *)error;
 - (void) paymentQueueRestoreCompletedTransactionsFinished:(SKPaymentQueue *)queue;
 
@@ -45,3 +47,15 @@
 @property (nonatomic,retain) CDVInvokedUrlCommand* command;
 
 @end;
+
+
+
+@interface IABMutablePayment : SKMutablePayment {
+    CDVInvokedUrlCommand *command;
+}
+
++ (id)paymentWithProduct:(SKProduct*)product forCommand:(CDVInvokedUrlCommand*)command;
+- (void)setCommand:(CDVInvokedUrlCommand*)orgCommand;
+- (CDVInvokedUrlCommand*	)getCommand;
+
+@end

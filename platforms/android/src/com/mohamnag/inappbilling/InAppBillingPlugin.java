@@ -540,6 +540,7 @@ public class InAppBillingPlugin extends CordovaPlugin {
     private void getProductDetails(final List<String> productIds, final CallbackContext callbackContext) throws JSONException {
         jsLog("getProductDetails called.");
 
+        // TODO: there maybe multiple productIds with a mixture of valid and invalid ones, lets think how we handle both of them!
         IabHelper.QueryInventoryFinishedListener invListener = new IabHelper.QueryInventoryFinishedListener() {
             @Override
             public void onQueryInventoryFinished(IabResult result, Inventory inventory) {
@@ -558,10 +559,11 @@ public class InAppBillingPlugin extends CordovaPlugin {
                     }
                 }
                 else {
-                    //I'm not really feeling good about just copying inventory OVER old data!
+                    // TODO: do not copy over the whole inventory, just add new ones!
                     myInventory = inventory;
 
                     jsLog("Query inventory was successful.");
+                    // TODO: pass lately loaded products to success in a same structure as in iOS
                     callbackContext.success();
                 }
             }
