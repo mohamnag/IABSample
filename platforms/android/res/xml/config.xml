@@ -1,12 +1,15 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="com.mohamnag.inappbillingtest" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:gap="http://phonegap.com/ns/1.0">
+<widget id="com.mohamnag.iabsample" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:gap="http://phonegap.com/ns/1.0">
     <preference name="loglevel" value="DEBUG" />
     <feature name="App">
         <param name="android-package" value="org.apache.cordova.App" />
     </feature>
-    <name>IAP Test</name>
+    <feature name="InAppBillingPlugin">
+        <param name="android-package" value="com.mohamnag.inappbilling.InAppBillingPlugin" />
+    </feature>
+    <name>IAB Sample</name>
     <description>
-        This is a test application for IAP plugin.
+        This is a test application for IAB plugin.
     </description>
     <author email="mohamnag@gmail.com" href="http://naghavi.me">
         Mohammad Naghavi
@@ -53,7 +56,4 @@
     <gap:splash gap:platform="ios" height="768" src="res/screen/ios/screen-ipad-landscape.png" width="1024" />
     <gap:splash gap:platform="winphone" src="res/screen/windows-phone/screen-portrait.jpg" />
     <access origin="http://127.0.0.1*" />
-    <feature name="InAppBillingPlugin">
-        <param name="android-package" value="com.mohamnag.inappbilling.InAppBillingPlugin" />
-    </feature>
 </widget>

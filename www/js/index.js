@@ -79,7 +79,7 @@
             }
         );
     },
-    loadProds: function() {
+    getAvailableProducts: function() {
         inappbilling.getAvailableProducts(
             function(prods) {
                 app.log('load products succeed', prods);
@@ -89,7 +89,7 @@
             }
         );
     },
-    buyRealProd: function() {
+    buyProd1: function() {
         inappbilling.buy(
             function(data) {
                 app.log('succeed buying "test_product_1"', data);
@@ -100,7 +100,29 @@
             'test_product_1'
         );
     },
-    consRealProd: function() {
+    consProd1: function() {
+        inappbilling.consumePurchase(
+            function(data) {
+                app.log('succeed consuming "test_product_1"', data);
+            },
+            function(err) {
+                app.log('failed consuming "test_product_1"', err);
+            },
+            'test_product_1'
+        );
+    },
+    buyProd2: function() {
+        inappbilling.buy(
+            function(data) {
+                app.log('succeed buying "test_product_1"', data);
+            },
+            function(err) {
+                app.log('failed buying "test_product_1"', err);
+            },
+            'test_product_1'
+        );
+    },
+    consProd2: function() {
         inappbilling.consumePurchase(
             function(data) {
                 app.log('succeed consuming "test_product_1"', data);

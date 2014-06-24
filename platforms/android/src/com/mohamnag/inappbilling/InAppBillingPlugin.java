@@ -559,10 +559,18 @@ public class InAppBillingPlugin extends CordovaPlugin {
                     }
                 }
                 else {
-                    // TODO: do not copy over the whole inventory, just add new ones!
-                    myInventory = inventory;
-
                     jsLog("Query inventory was successful.");
+                    
+                    // TODO: do not copy over the whole inventory, just add new ones! ~> ok now I believe the problem is the whole helper classes which shall be modified!
+                    myInventory = inventory;
+                    List<SkuDetails> products = myInventory.getAllProducts();
+                    
+                    jsLog("Loaded product count: " + products.size());
+                    
+                    for(SkuDetails product : products){
+                        jsLog(" - " + product.getSku() + " - " + product.getTitle());
+                    }
+                    
                     // TODO: pass lately loaded products to success in a same structure as in iOS
                     callbackContext.success();
                 }

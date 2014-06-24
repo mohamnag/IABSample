@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-var app = {
+ var app = {
     // Application Constructor
     initialize: function() {
         this.bindEvents();
@@ -34,24 +34,6 @@ var app = {
     // function, we must explicity call 'app.receivedEvent(...);'
     onDeviceReady: function() {
         app.receivedEvent('deviceready');
-
-        if (typeof(inappbilling) !== 'undefined') {
-            inappbilling.init(
-                    function() {
-                        app.receivedEvent('inappbillingready');
-                    },
-                    function(err) {
-                        document.getElementById('output').innerHTML = err;
-                    },
-                    {
-                        showLog: true
-                    },
-                    [
-                        "test_product_1",
-                        "test_product_2"
-                    ]
-            );
-        }
     },
     // Update DOM on a Received Event
     receivedEvent: function(id) {
@@ -61,64 +43,94 @@ var app = {
 
         listeningElement.setAttribute('style', 'display:none;');
         receivedElement.setAttribute('style', 'display:block;');
+    },
+    log: function(msg, data) {
+        console.log('IABSample: ' + msg);
+        !!data && console.log(data);
 
-        console.log('Received Event: ' + id);
+        document.getElementById('output').innerHTML = msg + '<hl/>' + JSON.stringify(data);
     },
-    loadProds: function() {
+    initIab: function() {
+        inappbilling.init(
+            function() {
+                app.receivedEvent('inappbillingready');
+                app.log('init succeed');
+            },
+            function(err) {
+                app.log('init failed', err);
+            },
+            {
+                showLog: true
+            },
+            [
+                "test_product_1",
+                "test_product_2"
+            ]
+        );
+        
+    },
+    getPurchases: function() {
+        inappbilling.getPurchases(
+            function(purchases) {
+                app.log('get purchases succeed', pruchases);
+            },
+            function(err) {
+                app.log('get purchases failed', err);
+            }
+        );
+    },
+    getAvailableProducts: function() {
         inappbilling.getAvailableProducts(
-                function(prods) {
-                    console.log(prods);
-                    document.getElementById('output').innerHTML = JSON.stringify(prods);
-                },
-                function(err) {
-                    console.log(err);
-                }
+            function(prods) {
+                app.log('load products succeed', prods);
+            },
+            function(err) {
+                app.log('load product failed', err);
+            }
         );
     },
-    buyProd: function() {
+    buyProd1: function() {
         inappbilling.buy(
-                function(data) {
-                    document.getElementById('output').innerHTML = 'succeed buying: ' + data;
-                    console.log(data);
-                },
-                function(err) {
-                    document.getElementById('output').innerHTML = 'failed buying: ' + err;
-                    console.log(err);
-                },
-                'android.test.purchased'
+            function(data) {
+                app.log('succeed buying "test_product_1"', data);
+            },
+            function(err) {
+                app.log('failed buying "test_product_1"', err);
+            },
+            'test_product_1'
         );
     },
-    consProd: function() {
+    consProd1: function() {
         inappbilling.consumePurchase(
-                function(data) {
-                    document.getElementById('output').innerHTML = 'succeed buying: ' + data;
-                },
-                function(err) {
-                    document.getElementById('output').innerHTML = 'failed buying: ' + err;
-                },
-                'android.test.purchased'
+            function(data) {
+                app.log('succeed consuming "test_product_1"', data);
+            },
+            function(err) {
+                app.log('failed consuming "test_product_1"', err);
+            },
+            'test_product_1'
         );
     },
-    buyRealProd: function() {
+    buyProd2: function() {
         inappbilling.buy(
-                function(data) {
-                    document.getElementById('output').innerHTML = 'succeed buying: ' + data;
-                },
-                function(err) {
-                    document.getElementById('output').innerHTML = 'failed buying: ' + err;
-                },
-                'test_product_1'
+            function(data) {
+                app.log('succeed buying "test_product_1"', data);
+            },
+            function(err) {
+                app.log('failed buying "test_product_1"', err);
+            },
+            'test_product_1'
         );
     },
-    consRealProd: function() {
+    consProd2: function() {
         inappbilling.consumePurchase(
-                function(data) {
-                    document.getElementById('output').innerHTML = 'succeed buying: ' + data;
-                },
-                function(err) {
-                    document.getElementById('output').innerHTML = 'failed buying: ' + err;
-                },
-                'test_product_1'
+            function(data) {
+                app.log('succeed consuming "test_product_1"', data);
+            },
+            function(err) {
+                app.log('failed consuming "test_product_1"', err);
+            },
+            'test_product_1'
         );
     }
 };

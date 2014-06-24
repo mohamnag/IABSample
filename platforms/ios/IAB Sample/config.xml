@@ -19,9 +19,6 @@
     <feature name="LocalStorage">
         <param name="ios-package" value="CDVLocalStorage" />
     </feature>
-    <feature name="InAppPurchase">
-        <param name="ios-package" value="InAppPurchase" />
-    </feature>
     <name>IAB Sample</name>
     <description>
         This is a test application for IAB plugin.
@@ -71,4 +68,7 @@
     <gap:splash gap:platform="ios" height="768" src="res/screen/ios/screen-ipad-landscape.png" width="1024" />
     <gap:splash gap:platform="winphone" src="res/screen/windows-phone/screen-portrait.jpg" />
     <access origin="http://127.0.0.1*" />
+    <feature name="InAppPurchase">
+        <param name="ios-package" value="InAppPurchase" />
+    </feature>
 </widget>

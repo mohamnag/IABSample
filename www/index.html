@@ -33,7 +33,7 @@
     <body>
         <div class="topcoat-navigation-bar">
             <div class="topcoat-navigation-bar__item center full">
-                <h1 class="topcoat-navigation-bar__title">IAP Test</h1>
+                <h1 class="topcoat-navigation-bar__title">IABSample</h1>
             </div>
         </div>
 
@@ -49,9 +49,11 @@
             
             <button class="topcoat-button--large three-quarters" onclick="app.initIab()">Init IAB</button>
             <button class="topcoat-button--large three-quarters" onclick="app.getPurchases()">Get Purchases</button>
-            <button class="topcoat-button--large three-quarters" onclick="app.loadProds()">Load Prods</button>
-            <button class="topcoat-button--large three-quarters" onclick="app.buyRealProd()">Buy Real Prod</button>
-            <button class="topcoat-button--large three-quarters" onclick="app.consRealProd()">Consume Real Prod</button>
+            <button class="topcoat-button--large three-quarters" onclick="app.getAvailableProducts()">Get Avail. Prods</button>
+            <button class="topcoat-button--large three-quarters" onclick="app.buyProd1()">Buy Prod 1</button>
+            <button class="topcoat-button--large three-quarters" onclick="app.consProd1()">Consume Prod 1</button>
+            <button class="topcoat-button--large three-quarters" onclick="app.buyProd2()">Buy Prod 2</button>
+            <button class="topcoat-button--large three-quarters" onclick="app.consProd2()">Consume Prod 2</button>
             
             <h5>Output</h5>
             <div id="output"></div>

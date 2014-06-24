@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!-- config.xml reference: https://build.phonegap.com/docs/config-xml -->
+<!-- id        = "com.mohamnag.inappbillingtest" -->
 <widget xmlns     = "http://www.w3.org/ns/widgets"
         xmlns:gap = "http://phonegap.com/ns/1.0"
-        id        = "com.mohamnag.inappbillingtest"
+        id        = "com.mohamnag.iabsample"
         version   = "0.0.1">
 
-    <name>IAP Test</name>
+    <name>IAB Sample</name>
 
     <description>
-        This is a test application for IAP plugin.
+        This is a test application for IAB plugin.
     </description>
 
     <author href="http://naghavi.me" email="mohamnag@gmail.com">

@@ -1,5 +1,5 @@
 phonegap plugin remove com.mohamnag.inappbilling
 phonegap plugin add ../InAppBilling/
 # platforms/android/cordova/build --release
-phonegap run ios
+phonegap run android
 
