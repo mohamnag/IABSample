@@ -137,6 +137,31 @@ describe('IABPlugin', function() {
             }, delayForInitReaction);
         });
 
+        it('should return right arguments for success', function(done) {
+            inappbilling.init(success, fail);
+
+            setTimeout(function() {
+                expect(success.calls.count()).toEqual(1);
+                expect(success.calls.argsFor(0)).toEqual(['OK']);
+                expect(fail).not.toHaveBeenCalled();
+
+                done();
+            }, delayForInitReaction);
+        });
+
+        // TODO: how to make init fail???
+//        it('should return right arguments for fail', function(done) {
+//            inappbilling.init(success, fail);
+//
+//            setTimeout(function() {
+//                expect(success).toHaveBeenCalled();
+//                expect(success.calls.argsFor(0)).toEqual([]);
+//                expect(fail).not.toHaveBeenCalled();
+//
+//                done();
+//            }, delayForInitReaction);
+//        });
+
     });
 
 
