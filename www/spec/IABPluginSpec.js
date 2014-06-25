@@ -22,7 +22,25 @@
  * 
  */
 
-describe('IABPlugin', function() {
+/**
+ * This is an automated test for IAB plugin. For this to run successfully:
+ * 
+ * on android:
+ *  -   the app should be published on google play (use alpha or beta if you dont 
+ *      want the app to appear on your account now.
+ *      
+ *  -   the account on the device intended for testing should be registered for 
+ *      testing product (unless you want to do real payments).
+ *      
+ *  -   following in-app purchasing items should have been defined and published:
+ *      * test_product_1    (Managed)
+ *      * test_product_2    (Unmanaged)
+ *      
+ *  -   following in-app purchasing item should NOT be defined:
+ *      * not_existing_product_id
+ */
+
+describe('InAppBilling', function() {
 
     it('waits for device ready and cordova plugin load', function(done) {
         document.addEventListener(
@@ -34,7 +52,7 @@ describe('IABPlugin', function() {
                 );
     });
 
-    describe('initialization', function() {
+    describe('init', function() {
         var success, fail;
         var delayForInitReaction = 1000;
 
@@ -163,6 +181,17 @@ describe('IABPlugin', function() {
 //        });
 
     });
+    
+    describe('getProductDetails', function() {});
+    
+    describe('getAvailableProducts', function() {});
 
-
+    describe('buy', function() {});
+    
+    describe('subscribe', function() {});
+    
+    describe('getPurchases', function() {});
+    
+    describe('consumePurchase', function() {});
+    
 });
