@@ -323,7 +323,6 @@ public class InAppBillingPlugin extends CordovaPlugin {
         jsLog("buy called for productId: " + productId + " payload: " + payload);
 
         // TODO: we have to check if to-be-purchased product is already loaded or not.
-
         this.cordova.setActivityResultCallback(this);
 
         // we create one listener for each purchase request, this guarnatiees 
@@ -516,17 +515,7 @@ public class InAppBillingPlugin extends CordovaPlugin {
         jsLog("getAvailableProducts called.");
 
         if (isInventoryLoaded(callbackContext)) {
-            List<SkuDetails> productsList = myInventory.getAllProducts();
-
-            // Convert the java list to JSON
-            JSONArray jsonProductDetailsList = new JSONArray();
-            for (SkuDetails product : productsList) {
-                jsLog("SKUDetails: Title: " + product.getTitle());
-                //TODO: sync this structure with iOS
-                jsonProductDetailsList.put(product.toJson());
-            }
-
-            callbackContext.success(jsonProductDetailsList);
+            callbackContext.success(myInventory.getAllProductsJSON());
         }
     }
 
@@ -546,33 +535,27 @@ public class InAppBillingPlugin extends CordovaPlugin {
             public void onQueryInventoryFinished(IabResult result, Inventory inventory) {
                 jsLog("Inventory listener called.");
 
-                if (result.isFailure()) {
-                    try {
+                try {
+                    if (result.isFailure()) {
                         callbackContext.error(ErrorEvent.buildJson(
                                 ERR_LOAD_INVENTORY,
                                 "Failed to query inventory.",
                                 result
                         ));
                     }
-                    catch (JSONException e) {
-                        jsLog(e.getMessage());
+                    else {
+                        jsLog("Query inventory was successful.");
+
+                        // TODO: do not copy over the whole inventory, just add new ones! ~> ok now I believe the problem is the whole helper classes which shall be modified!
+                        myInventory = inventory;
+                        jsLog("Loaded product count: " + myInventory.getProductCount());
+
+                        // pass only recently loaded products
+                        callbackContext.success(inventory.getAllProductsJSON());
                     }
                 }
-                else {
-                    jsLog("Query inventory was successful.");
-                    
-                    // TODO: do not copy over the whole inventory, just add new ones! ~> ok now I believe the problem is the whole helper classes which shall be modified!
-                    myInventory = inventory;
-                    List<SkuDetails> products = myInventory.getAllProducts();
-                    
-                    jsLog("Loaded product count: " + products.size());
-                    
-                    for(SkuDetails product : products){
-                        jsLog(" - " + product.getSku() + " - " + product.getTitle());
-                    }
-                    
-                    // TODO: pass lately loaded products to success in a same structure as in iOS
-                    callbackContext.success();
+                catch (JSONException e) {
+                    jsLog(e.getMessage());
                 }
             }
         };

@@ -1,8 +1,5 @@
-
-
 package com.mohamnag.inappbilling.helper;
 
-import com.mohamnag.inappbilling.helper.IabHelper;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -10,42 +7,79 @@ import org.json.JSONObject;
  * Represents an in-app product's listing details.
  */
 public class SkuDetails {
+
     String mItemType;
-    String mSku;
-    String mType;
-    String mPrice;
-    String mTitle;
-    String mDescription;
-    String mJson;
+    
+    String id;
+    String type;
+    String fromattedPrice;
+    String title;
+    String description;
+    String json;
+    int priceMicro;
+    String currency;
 
     public SkuDetails(String jsonSkuDetails) throws JSONException {
         this(IabHelper.ITEM_TYPE_INAPP, jsonSkuDetails);
     }
-    
-    public SkuDetails(String itemType, String jsonSkuDetails) throws JSONException {
+
+    public SkuDetails(String itemType, String json) throws JSONException {
         mItemType = itemType;
-        mJson = jsonSkuDetails;
-        JSONObject o = new JSONObject(mJson);
-        mSku = o.optString("productId");
-        mType = o.optString("type");
-        mPrice = o.optString("price");
-        mTitle = o.optString("title");
-        mDescription = o.optString("description");
+        
+        this.json = json;
+        
+        JSONObject o = new JSONObject(json);
+        id = o.optString("productId");
+        type = o.optString("type");
+        fromattedPrice = o.optString("price");
+        title = o.optString("title");
+        description = o.optString("description");
+        priceMicro = o.optInt("price_amount_micros");
+        currency = o.optString("price_currency_code");
     }
 
-    public String getSku() { return mSku; }
-    public String getType() { return mType; }
-    public String getPrice() { return mPrice; }
-    public String getTitle() { return mTitle; }
-    public String getDescription() { return mDescription; }
+    public String getSku() {
+        return id;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public String getPrice() {
+        return fromattedPrice;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
 
     @Override
     public String toString() {
-        return "SkuDetails:" + mJson;
+        return "SkuDetails:" + json;
     }
     
+    /**
+     * Converts the values for current product to JSON in same format that
+     * native code on other platforms return to javascript.
+     *
+     * @return
+     */
     public JSONObject toJson() throws JSONException {
-    	JSONObject jsonObj = new JSONObject(mJson);
-    	return jsonObj;
+        JSONObject jsonObj = new JSONObject();
+        
+        jsonObj.put("id", id);
+        jsonObj.put("type", type);
+        jsonObj.put("price", fromattedPrice);
+        jsonObj.put("priceMicros", priceMicro);
+        jsonObj.put("currencyCode", currency);
+        jsonObj.put("title", title);
+        jsonObj.put("description", description);
+
+        return jsonObj;
     }
 }
