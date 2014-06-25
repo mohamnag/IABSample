@@ -36,12 +36,12 @@ describe('IABPlugin', function() {
 
     describe('initialization', function() {
         var success, fail;
+        var delayForInitReaction = 1000;
 
         beforeEach(function() {
             success = jasmine.createSpy('success');
             fail = jasmine.createSpy('fail');
         });
-
 
         it('should initialize without products list', function(done) {
             inappbilling.init(success, fail);
@@ -51,7 +51,7 @@ describe('IABPlugin', function() {
                 expect(fail).not.toHaveBeenCalled();
 
                 done();
-            }, 1000);
+            }, delayForInitReaction);
         });
 
         it('should initialize with products list', function(done) {
@@ -67,9 +67,40 @@ describe('IABPlugin', function() {
                 expect(fail).not.toHaveBeenCalled();
 
                 done();
-            }, 1000);
+            }, delayForInitReaction);
         });
 
+        it('should initialize even with not existing product', function(done) {
+            inappbilling.init(success, fail, {
+                showLog: true
+            },
+            [
+                "not_existing_product_id"
+            ]
+                    );
+
+            setTimeout(function() {
+                expect(success).toHaveBeenCalled();
+                expect(fail).not.toHaveBeenCalled();
+
+                done();
+            }, delayForInitReaction);
+        });
+
+        it('should not show logs by default', function(done) {
+            spyOn(console, 'log');
+
+            inappbilling.init(success, fail);
+
+            setTimeout(function() {
+                expect(success).toHaveBeenCalled();
+                expect(fail).not.toHaveBeenCalled();
+                expect(console.log).not.toHaveBeenCalled();
+
+                done();
+            }, delayForInitReaction);
+        });
+        
         it('should not show logs when requested', function(done) {
             spyOn(console, 'log');
 
@@ -85,10 +116,10 @@ describe('IABPlugin', function() {
                 expect(console.log).not.toHaveBeenCalled();
 
                 done();
-            }, 1000);
+            }, delayForInitReaction);
         });
 
-        it('should show logs when requested', function() {
+        it('should show logs when requested', function(done) {
             spyOn(console, 'log');
 
             inappbilling.init(success, fail,
@@ -96,14 +127,14 @@ describe('IABPlugin', function() {
                         showLog: true
                     }
             );
-    
+
             setTimeout(function() {
                 expect(success).toHaveBeenCalled();
                 expect(fail).not.toHaveBeenCalled();
                 expect(console.log).toHaveBeenCalled();
 
                 done();
-            }, 1000);
+            }, delayForInitReaction);
         });
 
     });
