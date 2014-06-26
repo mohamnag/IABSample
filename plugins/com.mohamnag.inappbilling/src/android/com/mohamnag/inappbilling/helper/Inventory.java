@@ -25,6 +25,10 @@ public class Inventory {
     public SkuDetails getSkuDetails(String sku) {
         return mSkuMap.get(sku);
     }
+    
+    public void addSkuDetails(SkuDetails sku) {
+        mSkuMap.put(sku.getSku(), sku);
+    }
 
     /**
      * Returns purchase information for a given product, or null if there is no
@@ -113,9 +117,9 @@ public class Inventory {
     public int getProductCount() {
         return mSkuMap.size();
     }
-
-    void addSkuDetails(SkuDetails d) {
-        mSkuMap.put(d.getSku(), d);
+    
+    public int getPurchaseCount() {
+        return mPurchaseMap.size();
     }
 
     public void addPurchase(Purchase p) {

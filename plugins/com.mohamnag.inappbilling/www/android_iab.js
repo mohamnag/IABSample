@@ -268,7 +268,10 @@ InAppBilling.prototype.getLoadedProducts = function(success, fail) {
 
 /**
  * Get details for a list of product ids. This will also load the products' 
- * details if they are not already loaded.
+ * details if they are not already loaded. Will only return the product details
+ * for the **valid product ids** from the requested list. Will not return the items
+ * which have been loaded before. Use [getLoadedProducts]{@link module:InAppBilling#getLoadedProducts}
+ * to get the complete list of all products loaded ever.
  * 
  * @param {loadProductDetailsSuccessCallback} success    callback for successful query
  * @param {errorCallback} fail  callback for failed query

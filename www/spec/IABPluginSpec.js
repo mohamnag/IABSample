@@ -48,6 +48,22 @@ customMatchers = {
                 return result;
             }
         };
+    },
+    toBeArray: function(util, customEqualityTesters) {
+
+        return {
+            compare: function(actual, expected) {
+                var result = {};
+
+                result.pass = actual instanceof Array;
+
+                if (!result.pass) {
+                    result.message = "Expected " + actual + " to be an array";
+                }
+
+                return result;
+            }
+        };
     }
 };
 
@@ -117,15 +133,10 @@ describe('InAppBilling', function() {
         });
 
         it('should initialize with products list', function(done) {
-            inappbilling.init(success, fail,
-                    {
-                        showLog: true
-                    },
-            [
+            inappbilling.init(success, fail, {}, [
                 "test_product_1",
                 "test_product_2"
-            ]
-                    );
+            ]);
 
             setTimeout(function() {
                 expect(success).toHaveBeenCalled();
@@ -321,16 +332,152 @@ describe('InAppBilling', function() {
     });
 
     describe('getLoadedProducts', function() {
-        
+
         beforeEach(function(done) {
             // we definitly need a working but empty plugin!
             inappbilling.init(function() {
                 done();
             });
         });
-        
-        xit('inventory should be empty before loading products');
-        xit('should not remove existing products when loading new ones');
+
+        it('should return empty inventory before loading products', function(done) {
+            inappbilling.getLoadedProducts(function(products) {
+                expect(products).toBeDefined();
+                expect(products).toBeArray();
+                expect(products.length).toBe(0);
+
+                done();
+
+            }, function() {
+                expect(false).toBeEqual(true);
+            });
+        });
+
+        it('should return one item in inventory after loading only one', function(done) {
+            var fail = function() {
+                expect(false).toBeEqual(true);
+            };
+
+            // check empty
+            inappbilling.getLoadedProducts(function(products) {
+                expect(products.length).toBe(0);
+
+                // load
+                inappbilling.loadProductDetails(function() {
+
+                    // check not empty!
+                    inappbilling.getLoadedProducts(function(products) {
+                        expect(products).toBeDefined();
+                        expect(products).toBeArray();
+                        expect(products.length).toBe(1);
+
+                        done();
+                    }, fail);
+
+                }, fail, 'test_product_1');
+
+            }, fail);
+        });
+
+        it('should return multiple items in inventory after loading multiple items at once', function(done) {
+            var fail = function() {
+                expect(false).toBeEqual(true);
+            };
+
+            // check empty
+            inappbilling.getLoadedProducts(function(products) {
+                expect(products.length).toBe(0);
+
+                // load
+                inappbilling.loadProductDetails(function() {
+
+                    // check not empty!
+                    inappbilling.getLoadedProducts(function(products) {
+                        expect(products).toBeDefined();
+                        expect(products).toBeArray();
+                        expect(products.length).toBe(2);
+
+                        done();
+                    }, fail);
+
+                }, fail, [
+                    'test_product_1',
+                    'test_product_2'
+                ]);
+
+            }, fail);
+        });
+
+        it('should return multiple items in inventory after loading multiple items incrementally', function(done) {
+            var fail = function() {
+                expect(false).toBeEqual(true);
+            };
+
+            // check empty
+            inappbilling.getLoadedProducts(function(products) {
+                expect(products.length).toBe(0);
+
+                // load 1st
+                inappbilling.loadProductDetails(function() {
+                    // load 2nd
+                    inappbilling.loadProductDetails(function() {
+
+                        // check not empty!
+                        inappbilling.getLoadedProducts(function(products) {
+                            expect(products).toBeDefined();
+                            expect(products).toBeArray();
+                            expect(products.length).toBe(2);
+
+                            done();
+                        }, fail);
+
+                    }, fail, [
+                        'test_product_2'
+                    ]);
+
+                }, fail, [
+                    'test_product_1'
+                ]);
+
+            }, fail);
+        });
+
+        it('should not change inventory when not existing product loaded', function(done) {
+            var fail = function() {
+                expect(false).toBeEqual(true);
+            };
+
+            // check empty
+            inappbilling.getLoadedProducts(function(products) {
+                expect(products.length).toBe(0);
+
+                // load valid products
+                inappbilling.loadProductDetails(function() {
+
+                    // load invalid products
+                    inappbilling.loadProductDetails(function() {
+
+                        // check not empty!
+                        inappbilling.getLoadedProducts(function(products) {
+                            expect(products).toBeDefined();
+                            expect(products).toBeArray();
+                            expect(products.length).toBe(2);
+
+                            done();
+                        }, fail);
+
+                    }, fail, [
+                        'not_existing_product_id'
+                    ]);
+
+                }, fail, [
+                    'test_product_1',
+                    'test_product_2'
+                ]);
+
+            }, fail);
+        });
+
     });
 
     describe('buy', function() {

@@ -267,9 +267,11 @@ public class InAppBillingPlugin extends CordovaPlugin {
                 else {
                     // Hooray, IAB is fully set up.
                     jsLog("Setup finished successfully.");
+                    
+                    myInventory = new Inventory();
                     initialized = true;
 
-                    // Now, let's get an inventory of stuff we own.
+                    // Now, let's pupulate inventory with products
                     try {
                         loadProductDetails(productIds, callbackContext);
                     }
@@ -546,9 +548,22 @@ public class InAppBillingPlugin extends CordovaPlugin {
                     else {
                         jsLog("Query inventory was successful.");
 
-                        // TODO: do not copy over the whole inventory, just add new ones! ~> ok now I believe the problem is the whole helper classes which shall be modified!
-                        myInventory = inventory;
-                        jsLog("Loaded product count: " + myInventory.getProductCount());
+                        jsLog("Loaded product count: " + inventory.getProductCount());
+                        jsLog("Loaded purchase count: " + inventory.getPurchaseCount());
+
+                        // merge products with existing ones
+                        for (SkuDetails product : inventory.getAllProducts()) {
+                            if (!myInventory.hasDetails(product.getSku())) {
+                                myInventory.addSkuDetails(product);
+                            }
+                        }
+
+                        // merge purchases with existing ones
+                        for (Purchase purchase : inventory.getAllPurchases()) {
+                            if (!myInventory.hasPurchase(purchase.getSku())) {
+                                myInventory.addPurchase(purchase);
+                            }
+                        }
 
                         // pass only recently loaded products
                         callbackContext.success(inventory.getAllProductsJSON());
