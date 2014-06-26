@@ -98,6 +98,10 @@ describe('InAppBilling', function() {
         description: "Test Product 1 Description"
     };
 
+    var fail = function() {
+        expect(false).toBeEqual(true);
+    };
+
     beforeEach(function() {
         jasmine.addMatchers(customMatchers);
     });
@@ -113,12 +117,12 @@ describe('InAppBilling', function() {
     });
 
     describe('init', function() {
-        var success, fail;
+        var success, failCallback;
         var delayForInitReaction = 1000;
 
         beforeEach(function() {
             success = jasmine.createSpy('success');
-            fail = jasmine.createSpy('fail');
+            failCallback = jasmine.createSpy('fail');
         });
 
         it('should initialize without products list', function(done) {
@@ -126,7 +130,7 @@ describe('InAppBilling', function() {
 
             setTimeout(function() {
                 expect(success).toHaveBeenCalled();
-                expect(fail).not.toHaveBeenCalled();
+                expect(failCallback).not.toHaveBeenCalled();
 
                 done();
             }, delayForInitReaction);
@@ -140,7 +144,7 @@ describe('InAppBilling', function() {
 
             setTimeout(function() {
                 expect(success).toHaveBeenCalled();
-                expect(fail).not.toHaveBeenCalled();
+                expect(failCallback).not.toHaveBeenCalled();
 
                 expect(success.calls.argsFor(0).length).toEqual(1);
                 expect(success.calls.argsFor(0)[0].length).toEqual(2);
@@ -160,7 +164,7 @@ describe('InAppBilling', function() {
 
             setTimeout(function() {
                 expect(success).toHaveBeenCalled();
-                expect(fail).not.toHaveBeenCalled();
+                expect(failCallback).not.toHaveBeenCalled();
 
                 expect(success.calls.argsFor(0)).toEqual([[]]);
 
@@ -175,7 +179,7 @@ describe('InAppBilling', function() {
 
             setTimeout(function() {
                 expect(success).toHaveBeenCalled();
-                expect(fail).not.toHaveBeenCalled();
+                expect(failCallback).not.toHaveBeenCalled();
                 expect(console.log).not.toHaveBeenCalled();
 
                 done();
@@ -193,7 +197,7 @@ describe('InAppBilling', function() {
 
             setTimeout(function() {
                 expect(success).toHaveBeenCalled();
-                expect(fail).not.toHaveBeenCalled();
+                expect(failCallback).not.toHaveBeenCalled();
                 expect(console.log).not.toHaveBeenCalled();
 
                 done();
@@ -211,7 +215,7 @@ describe('InAppBilling', function() {
 
             setTimeout(function() {
                 expect(success).toHaveBeenCalled();
-                expect(fail).not.toHaveBeenCalled();
+                expect(failCallback).not.toHaveBeenCalled();
                 expect(console.log).toHaveBeenCalled();
 
                 done();
@@ -224,7 +228,7 @@ describe('InAppBilling', function() {
             setTimeout(function() {
                 expect(success.calls.count()).toEqual(1);
                 expect(success.calls.argsFor(0)).toEqual([[]]);
-                expect(fail).not.toHaveBeenCalled();
+                expect(failCallback).not.toHaveBeenCalled();
 
                 done();
             }, delayForInitReaction);
@@ -239,7 +243,7 @@ describe('InAppBilling', function() {
             setTimeout(function() {
                 expect(success.calls.count()).toEqual(1);
                 expect(success.calls.argsFor(0)[0].length).toEqual(2);
-                expect(fail).not.toHaveBeenCalled();
+                expect(failCallback).not.toHaveBeenCalled();
 
                 done();
             }, delayForInitReaction);
@@ -252,7 +256,7 @@ describe('InAppBilling', function() {
 //            setTimeout(function() {
 //                expect(success).toHaveBeenCalled();
 //                expect(success.calls.argsFor(0)).toEqual([]);
-//                expect(fail).not.toHaveBeenCalled();
+//                expect(failCallback).not.toHaveBeenCalled();
 //
 //                done();
 //            }, delayForInitReaction);
@@ -276,9 +280,7 @@ describe('InAppBilling', function() {
                         expect(products[0].id).toEqual("test_product_1");
                         done();
                     },
-                    function() {
-                        expect(false).toBe(true);
-                    },
+                    fail,
                     'test_product_1'
                     );
 
@@ -301,9 +303,7 @@ describe('InAppBilling', function() {
                         done();
 
                     },
-                    function() {
-                        expect(false).toBe(true);
-                    },
+                    fail,
                     [
                         'test_product_1',
                         'test_product_2'
@@ -314,18 +314,12 @@ describe('InAppBilling', function() {
 
         it('should not load invalid products', function(done) {
 
-            inappbilling.loadProductDetails(
-                    function(products) {
-                        expect(products.length).toEqual(0);
-                        done();
-                    },
-                    function() {
-                        expect(false).toBe(true);
-                    },
-                    [
-                        'not_existing_product_id'
-                    ]
-                    );
+            inappbilling.loadProductDetails(function(products) {
+                expect(products.length).toEqual(0);
+                done();
+            }, fail, [
+                'not_existing_product_id'
+            ]);
 
         });
 
@@ -348,15 +342,10 @@ describe('InAppBilling', function() {
 
                 done();
 
-            }, function() {
-                expect(false).toBeEqual(true);
-            });
+            }, fail);
         });
 
         it('should return one item in inventory after loading only one', function(done) {
-            var fail = function() {
-                expect(false).toBeEqual(true);
-            };
 
             // check empty
             inappbilling.getLoadedProducts(function(products) {
@@ -380,9 +369,6 @@ describe('InAppBilling', function() {
         });
 
         it('should return multiple items in inventory after loading multiple items at once', function(done) {
-            var fail = function() {
-                expect(false).toBeEqual(true);
-            };
 
             // check empty
             inappbilling.getLoadedProducts(function(products) {
@@ -409,9 +395,6 @@ describe('InAppBilling', function() {
         });
 
         it('should return multiple items in inventory after loading multiple items incrementally', function(done) {
-            var fail = function() {
-                expect(false).toBeEqual(true);
-            };
 
             // check empty
             inappbilling.getLoadedProducts(function(products) {
@@ -443,9 +426,6 @@ describe('InAppBilling', function() {
         });
 
         it('should not change inventory when not existing product loaded', function(done) {
-            var fail = function() {
-                expect(false).toBeEqual(true);
-            };
 
             // check empty
             inappbilling.getLoadedProducts(function(products) {
