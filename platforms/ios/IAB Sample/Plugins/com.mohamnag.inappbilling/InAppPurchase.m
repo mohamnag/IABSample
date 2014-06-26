@@ -254,12 +254,19 @@ static NSString *jsErrorCodeAsString(NSInteger code) {
     /* 
     TODO: find/implement the right thing for iOS
 
-    this is renamed from original appStoreReceipt, I'm not sure if that provides the type of data we want for getPurchases.
+    this is renamed from original appStoreReceipt, I'm not sure if that provides 
+    the type of data we want for getPurchases.
 
-    I dont think this function matches the InAppPurchase.prototype.loadReceipts one. as that function
-    only tries to get receipt either from locally stored ones or from a URL.
-    we need probably something to refresh the receipt like SKReceiptRefreshRequest from 
+    we need probably something to refresh the receipt like 
+    SKReceiptRefreshRequest from 
     https://developer.apple.com/library/ios/documentation/NetworkingInternet/Conceptual/StoreKitGuide/Chapters/Restoring.html#//apple_ref/doc/uid/TP40008267-CH8-SW9
+
+
+    ok, I was right, this return the complete receipt, what we need is to extract
+    purchases (not the expired ones, in order to match android's functionality) 
+    and return it to user. maybe also refresh the receipt before doing it.
+
+    https://developer.apple.com/library/ios/releasenotes/General/ValidateAppStoreReceipt/Chapters/ReceiptFields.html#//apple_ref/doc/uid/TP40010573-CH106-SW1
     */
 
     [self jsLog:@"getPurchases called"];
@@ -281,6 +288,7 @@ static NSString *jsErrorCodeAsString(NSInteger code) {
     }
 }
 
+//https://github.com/j3k0/PhoneGap-InAppPurchase-iOS/issues/13
 - (NSData *)appStoreReceipt {
   NSURL *receiptURL = nil;
   NSBundle *bundle = [NSBundle mainBundle];

@@ -98,8 +98,33 @@ describe('InAppBilling', function() {
         description: "Test Product 1 Description"
     };
 
+    // the structure passed to error callback.
+    var errorObject = {
+        errorCode: 1,
+        msg: "",
+        nativeEvent: {}
+    };
+
+    // a purchase data just after being bought
+    var NewPurchaseObject = {
+        id: "",
+        originalId: "",
+        productId: "",
+        expirationDate: "",
+        verificationPayload: ""
+    };
+    
+    // a purchase data belonging to a previous payment process
+    var PurchaseObject = {
+        id: "",
+        originalId: "",
+        productId: "",
+        expirationDate: ""
+    };
+
+    // test fail function
     var fail = function() {
-        expect(false).toBeEqual(true);
+        expect(false).toBe(true);
     };
 
     beforeEach(function() {
@@ -137,7 +162,7 @@ describe('InAppBilling', function() {
         });
 
         it('should initialize with products list', function(done) {
-            inappbilling.init(success, fail, {}, [
+            inappbilling.init(success, function(){fail();done();}, {}, [
                 "test_product_1",
                 "test_product_2"
             ]);
@@ -156,7 +181,7 @@ describe('InAppBilling', function() {
         });
 
         it('should initialize even with not existing product', function(done) {
-            inappbilling.init(success, fail, {},
+            inappbilling.init(success, failCallback, {},
                     [
                         "not_existing_product_id"
                     ]
@@ -175,7 +200,7 @@ describe('InAppBilling', function() {
         it('should not show logs by default', function(done) {
             spyOn(console, 'log');
 
-            inappbilling.init(success, fail);
+            inappbilling.init(success, failCallback);
 
             setTimeout(function() {
                 expect(success).toHaveBeenCalled();
@@ -189,7 +214,7 @@ describe('InAppBilling', function() {
         it('should not show logs when requested', function(done) {
             spyOn(console, 'log');
 
-            inappbilling.init(success, fail,
+            inappbilling.init(success, failCallback,
                     {
                         showLog: false
                     }
@@ -207,7 +232,7 @@ describe('InAppBilling', function() {
         it('should show logs when requested', function(done) {
             spyOn(console, 'log');
 
-            inappbilling.init(success, fail,
+            inappbilling.init(success, failCallback,
                     {
                         showLog: true
                     }
@@ -223,7 +248,7 @@ describe('InAppBilling', function() {
         });
 
         it('should return right arguments for success with no products', function(done) {
-            inappbilling.init(success, fail);
+            inappbilling.init(success, failCallback);
 
             setTimeout(function() {
                 expect(success.calls.count()).toEqual(1);
@@ -235,7 +260,7 @@ describe('InAppBilling', function() {
         });
 
         it('should return right arguments for success with products', function(done) {
-            inappbilling.init(success, fail, {}, [
+            inappbilling.init(success, failCallback, {}, [
                 "test_product_1",
                 "test_product_2"
             ]);
@@ -251,7 +276,7 @@ describe('InAppBilling', function() {
 
         // TODO: how to make init fail???
 //        it('should return right arguments for fail', function(done) {
-//            inappbilling.init(success, fail);
+//            inappbilling.init(success, failCallback);
 //
 //            setTimeout(function() {
 //                expect(success).toHaveBeenCalled();
@@ -280,7 +305,7 @@ describe('InAppBilling', function() {
                         expect(products[0].id).toEqual("test_product_1");
                         done();
                     },
-                    fail,
+                    function(){fail();done();},
                     'test_product_1'
                     );
 
@@ -303,7 +328,7 @@ describe('InAppBilling', function() {
                         done();
 
                     },
-                    fail,
+                    function(){fail();done();},
                     [
                         'test_product_1',
                         'test_product_2'
@@ -317,7 +342,7 @@ describe('InAppBilling', function() {
             inappbilling.loadProductDetails(function(products) {
                 expect(products.length).toEqual(0);
                 done();
-            }, fail, [
+            }, function(){fail();done();}, [
                 'not_existing_product_id'
             ]);
 
@@ -342,7 +367,7 @@ describe('InAppBilling', function() {
 
                 done();
 
-            }, fail);
+            }, function(){fail();done();});
         });
 
         it('should return one item in inventory after loading only one', function(done) {
@@ -361,11 +386,11 @@ describe('InAppBilling', function() {
                         expect(products.length).toBe(1);
 
                         done();
-                    }, fail);
+                    }, function(){fail();done();});
 
-                }, fail, 'test_product_1');
+                }, function(){fail();done();}, 'test_product_1');
 
-            }, fail);
+            }, function(){fail();done();});
         });
 
         it('should return multiple items in inventory after loading multiple items at once', function(done) {
@@ -384,14 +409,14 @@ describe('InAppBilling', function() {
                         expect(products.length).toBe(2);
 
                         done();
-                    }, fail);
+                    }, function(){fail();done();});
 
-                }, fail, [
+                }, function(){fail();done();}, [
                     'test_product_1',
                     'test_product_2'
                 ]);
 
-            }, fail);
+            }, function(){fail();done();});
         });
 
         it('should return multiple items in inventory after loading multiple items incrementally', function(done) {
@@ -412,17 +437,17 @@ describe('InAppBilling', function() {
                             expect(products.length).toBe(2);
 
                             done();
-                        }, fail);
+                        }, function(){fail();done();});
 
-                    }, fail, [
+                    }, function(){fail();done();}, [
                         'test_product_2'
                     ]);
 
-                }, fail, [
+                }, function(){fail();done();}, [
                     'test_product_1'
                 ]);
 
-            }, fail);
+            }, function(){fail();done();});
         });
 
         it('should not change inventory when not existing product loaded', function(done) {
@@ -444,26 +469,92 @@ describe('InAppBilling', function() {
                             expect(products.length).toBe(2);
 
                             done();
-                        }, fail);
+                        }, function(){fail();done();});
 
-                    }, fail, [
+                    }, function(){fail();done();}, [
                         'not_existing_product_id'
                     ]);
 
-                }, fail, [
+                }, function(){fail();done();}, [
                     'test_product_1',
                     'test_product_2'
                 ]);
 
-            }, fail);
+            }, function(){fail();done();});
         });
 
     });
 
     describe('buy', function() {
+
+        beforeEach(function(done) {
+            // we definitly need a working but empty plugin!
+            inappbilling.init(function() {
+                done();
+            }, null, {showLog:true});
+
+            // increase timeout to 5min, as some of these test cases need user input
+            originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
+            jasmine.DEFAULT_TIMEOUT_INTERVAL = 300000;
+        });
+
+        afterEach(function() {
+            jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
+        });
+
+        it('should not allow buying not loaded products', function(done) {
+            inappbilling.buy(function(){fail();done();}, function(error) {
+                expect(error).toBeDefined();
+                expect(error).toImplement(errorObject);
+                expect(error.errorCode).toEqual(inappbilling.ERR_PRODUCT_NOT_LOADED);
+
+                done();
+
+            }, 'test_product_1');
+        });
+
+        it('should let buy an existing loaded product', function(done) {
+            alert('Please FINISH this payment, you have max 5 min time!');
+            
+            inappbilling.loadProductDetails(function() {
+
+                inappbilling.buy(function(purchase) {
+                    expect(purchase).toBeDefined();
+                    expect(purchase).toImplement(NewPurchaseObject);
+                    expect(purchase.productId).toEqual('test_product_1');
+
+                    done();
+
+                }, function(){fail();done();}, 'test_product_1');
+
+            }, function(){fail();done();}, 'test_product_1');
+
+        });
+        
+        it('should handle canceled payment correctly', function(done) {
+            alert('Please CANCEL this payment, you have max 5 min time!');
+            
+            inappbilling.loadProductDetails(function() {
+
+                inappbilling.buy(function(){fail();done();}, function(error) {
+                    expect(error).toBeDefined();
+                    expect(error).toImplement(errorObject);
+                    expect(error.errorCode).toEqual(inappbilling.ERR_PAYMENT_CANCELLED);
+
+                    done();
+
+                }, 'test_product_1');
+
+            }, function(){fail();done();}, 'test_product_1');
+
+        });
+
     });
 
     describe('subscribe', function() {
+    });
+
+    describe('getVerificationPayload', function() {
     });
 
     describe('getPurchases', function() {

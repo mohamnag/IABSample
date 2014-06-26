@@ -42,6 +42,7 @@ public class InAppBillingPlugin extends CordovaPlugin {
     private static final int ERR_PURCHASE = ERROR_CODES_BASE + 3;
     private static final int ERR_LOAD_RECEIPTS = ERROR_CODES_BASE + 4;
     private static final int ERR_CLIENT_INVALID = ERROR_CODES_BASE + 5;
+    // payment process was cancelled by user
     private static final int ERR_PAYMENT_CANCELLED = ERROR_CODES_BASE + 6;
     private static final int ERR_PAYMENT_INVALID = ERROR_CODES_BASE + 7;
     private static final int ERR_PAYMENT_NOT_ALLOWED = ERROR_CODES_BASE + 8;
@@ -56,6 +57,10 @@ public class InAppBillingPlugin extends CordovaPlugin {
     private static final int ERR_SUBSCRIPTION_NOT_SUPPORTED = ERROR_CODES_BASE + 18;
     private static final int ERR_CONSUME_NOT_OWNED_ITEM = ERROR_CODES_BASE + 19;
     private static final int ERR_CONSUMPTION_FAILED = ERROR_CODES_BASE + 20;
+    // the prduct to be bought is not loaded
+    private static final int ERR_PRODUCT_NOT_LOADED = ERROR_CODES_BASE + 21;
+    // invalid product ids passed
+    private static final int ERR_INVALID_PRODUCT_ID = ERROR_CODES_BASE + 22;
 
     private boolean initialized = false;
 
@@ -267,7 +272,7 @@ public class InAppBillingPlugin extends CordovaPlugin {
                 else {
                     // Hooray, IAB is fully set up.
                     jsLog("Setup finished successfully.");
-                    
+
                     myInventory = new Inventory();
                     initialized = true;
 
@@ -298,8 +303,8 @@ public class InAppBillingPlugin extends CordovaPlugin {
             ));
 
             return false;
-        } // Have we been disposed of in the meantime? If so, quit. (probably 
-        // useless but lets keep it for now!) 
+        }
+        // Have we been disposed of in the meantime? If so, quit. (probably useless but lets keep it for now!) 
         else if (mHelper == null) {
             callbackContext.error(ErrorEvent.buildJson(
                     ERR_HELPER_DISPOSED,
@@ -321,9 +326,19 @@ public class InAppBillingPlugin extends CordovaPlugin {
      * @param payload
      * @param callbackContext
      */
-    private void buy(final String productId, final String payload, final CallbackContext callbackContext) {
+    private void buy(final String productId, final String payload, final CallbackContext callbackContext) throws JSONException {
         jsLog("buy called for productId: " + productId + " payload: " + payload);
 
+        if (!myInventory.hasDetails(productId)) {
+            callbackContext.error(ErrorEvent.buildJson(
+                    ERR_PRODUCT_NOT_LOADED,
+                    "Product intended to be bought has not been loaded.",
+                    null
+            ));
+
+            return;
+        }
+        
         // TODO: we have to check if to-be-purchased product is already loaded or not.
         this.cordova.setActivityResultCallback(this);
 
@@ -336,7 +351,14 @@ public class InAppBillingPlugin extends CordovaPlugin {
                 try {
 
                     if (isReady(callbackContext)) {
-                        if (result.isFailure()) {
+                        if (result.getResponse() == IabHelper.IABHELPER_USER_CANCELLED) {
+                            callbackContext.error(ErrorEvent.buildJson(
+                                    ERR_PAYMENT_CANCELLED,
+                                    "Purchase cancelled by user.",
+                                    result
+                            ));                            
+                        }
+                        else if (result.isFailure()) {
                             callbackContext.error(ErrorEvent.buildJson(
                                     ERR_PURCHASE_FAILED,
                                     "Purchase failed",

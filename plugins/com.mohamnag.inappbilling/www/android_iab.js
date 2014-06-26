@@ -69,6 +69,10 @@ InAppBilling.prototype.ERR_INVALID_PURCHASE_PAYLOAD = ERROR_CODES_BASE + 17;
 InAppBilling.prototype.ERR_SUBSCRIPTION_NOT_SUPPORTED = ERROR_CODES_BASE + 18;
 InAppBilling.prototype.ERR_CONSUME_NOT_OWNED_ITEM = ERROR_CODES_BASE + 19;
 InAppBilling.prototype.ERR_CONSUMPTION_FAILED = ERROR_CODES_BASE + 20;
+// the prduct to be bought is not loaded
+InAppBilling.prototype.ERR_PRODUCT_NOT_LOADED = ERROR_CODES_BASE + 21;
+// invalid product ids passed
+InAppBilling.prototype.ERR_INVALID_PRODUCT_ID = ERROR_CODES_BASE + 22;
 
 /**
  * This function accepts and outputs all the logs, both from native and from JS
@@ -105,7 +109,7 @@ InAppBilling.prototype.init = function(success, fail, options, productIds) {
     this.options = {
         showLog: options.showLog || false
     };
-        
+
     // show log or mute the log
     //TODO: this shall mute logs on native too
     if (this.options.showLog === true) {
@@ -145,21 +149,31 @@ InAppBilling.prototype.init = function(success, fail, options, productIds) {
     }
 };
 
-//TODO: complete this and sync it with iOS
 /**
- * @typedef {Object} purchase
+ * @typedef Purchase
+ * @property {string} id populated with orderId (when on PlayStore) or transactionIdentifier (when on iTunes)
+ * @property {string} originalId populated with `originalTransaction.transactionIdentifier` available only on iOS and only for restored transactions
+ * @property {string} productId the id of the bought product
+ * @property {date} expirationDate the date of expiration for this purchase, only if the product is of subscription type and only as long as this is not past.
+ * @property {string} verificationPayload this is populated with `purchaseToken` when on PlayStore and with application's `receipt` when on iTunes. **Only set when this data is returned to buy or subscribe success callback.**
  */
 
 /**
  * The success callback for [getPurchases]{@link module:InAppBilling#getPurchases}
  * 
  * @callback getPurchasesSuccessCallback
- * @param {Array.<purchase>} purchaseList
+ * @param {Array.<Purchase>} purchaseList
  */
 
 /**
- * This will return the already boutgh items. The consumed items will not be on
- * this list, nor can be retrieved with any other method.
+ * This will return bought products that are not cunsumed or the subscriptions 
+ * that are not expired. Following items will not appear on this list:
+ * - consumable products which has been consumed
+ * - products which have been cancelled (as possible in iOS)
+ * - subscriptions that are expired
+ * 
+ * This is best practice to always look at this list on startup to activate 
+ * products in your application.
  * 
  * @param {getPurchasesSuccessCallback} success
  * @param {errorCallback} fail
@@ -174,7 +188,7 @@ InAppBilling.prototype.getPurchases = function(success, fail) {
  * [subscribe]{@link module:InAppBilling#subscribe}
  * 
  * @callback buySuccessCallback
- * @param {purchase} purchase the data of purchase
+ * @param {Purchase} purchase the data of purchase
  */
 
 /**
@@ -209,7 +223,7 @@ InAppBilling.prototype.subscribe = function(success, fail, productId) {
  * This is the callback for {@link module:InAppBilling#consumePurchase}
  * 
  * @callback consumePurchaseSuccessCallback
- * @param {purchase} purchase
+ * @param {Purchase} purchase
  */
 
 /**
@@ -299,6 +313,21 @@ InAppBilling.prototype.loadProductDetails = function(success, fail, productIds) 
 
         return cordova.exec(success, fail, "InAppBillingPlugin", "loadProductDetails", [productIds]);
     }
+};
+
+/**
+ * This will return a verification payload for one purchase. Depending on the 
+ * platform it means either the `purchaseToken` or the application `receipt` on
+ * PlayStore and iTunes respectively.
+ * 
+ * @param {type} success
+ * @param {type} fail
+ * @param {type} purchaseId
+ */
+InAppBilling.prototype.getVerificationPayload = function(success, fail, purchaseId) {
+    this.log('loadProductDetails called!');
+    
+    // TODO: to be implemented!    
 };
 
 module.exports = new InAppBilling();

@@ -69,6 +69,10 @@ InAppBilling.prototype.ERR_INVALID_PURCHASE_PAYLOAD = ERROR_CODES_BASE + 17;
 InAppBilling.prototype.ERR_SUBSCRIPTION_NOT_SUPPORTED = ERROR_CODES_BASE + 18;
 InAppBilling.prototype.ERR_CONSUME_NOT_OWNED_ITEM = ERROR_CODES_BASE + 19;
 InAppBilling.prototype.ERR_CONSUMPTION_FAILED = ERROR_CODES_BASE + 20;
+// the prduct to be bought is not loaded
+InAppBilling.prototype.ERR_PRODUCT_NOT_LOADED = ERROR_CODES_BASE + 21;
+// invalid product ids passed
+InAppBilling.prototype.ERR_INVALID_PRODUCT_ID = ERROR_CODES_BASE + 22;
 
 
 // TODO: this shall be removed!
