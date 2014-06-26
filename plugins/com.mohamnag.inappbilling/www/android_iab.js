@@ -180,7 +180,7 @@ InAppBilling.prototype.getPurchases = function(success, fail) {
 /**
  * Buys an item. The product should be loaded before this call. You can either 
  * load items at [init]{@link module:InAppBilling#init} or by calling 
- * [getProductDetails]{@link module:InAppBilling#getProductDetails}.
+ * [loadProductDetails]{@link module:InAppBilling#loadProductDetails}.
  * 
  * @param {buySuccessCallback} success  the callback for successful purchse
  * @param {errorCallback} fail  the callback for failed purchase
@@ -194,7 +194,7 @@ InAppBilling.prototype.buy = function(success, fail, productId) {
 /**
  * Subscribes to an item. The product should be loaded before this call. 
  * You can either load items at [init]{@link module:InAppBilling#init} or by 
- * calling [getProductDetails]{@link module:InAppBilling#getProductDetails}.
+ * calling [loadProductDetails]{@link module:InAppBilling#loadProductDetails}.
  * 
  * @param {buySuccessCallback} success  callback for successful subscription
  * @param {errorCallback} fail  callback for failed subscription
@@ -236,33 +236,33 @@ InAppBilling.prototype.consumePurchase = function(success, fail, productId) {
  */
 
 /**
- * The success callback for [getAvailableProducts]{@link module:InAppBilling#getAvailableProducts}.
+ * The success callback for [getLoadedProducts]{@link module:InAppBilling#getLoadedProducts}.
  * 
- * @callback getAvailableProductsSuccessCallback
+ * @callback getLoadedProductsSuccessCallback
  * @param {Array.<ProductDetails>} products
  */
 
 /**
  * Get all the loaded products. Products should be loaded before this call. 
  * You can either load items at [init]{@link module:InAppBilling#init} or by 
- * calling [getProductDetails]{@link module:InAppBilling#getProductDetails}.
+ * calling [loadProductDetails]{@link module:InAppBilling#loadProductDetails}.
  * 
- * @param {getAvailableProductsSuccessCallback} success callback for successful query
+ * @param {getLoadedProductsSuccessCallback} success callback for successful query
  * @param {errorCallback} fail  callback for failed query
  */
-InAppBilling.prototype.getAvailableProducts = function(success, fail) {
-    this.log('getAvailableProducts called!');
-    return cordova.exec(success, fail, "InAppBillingPlugin", "getAvailableProducts", ["null"]);
+InAppBilling.prototype.getLoadedProducts = function(success, fail) {
+    this.log('getLoadedProducts called!');
+    return cordova.exec(success, fail, "InAppBillingPlugin", "getLoadedProducts", ["null"]);
 };
 
 /**
- * This is the success callback for [getProductDetails]{@link module:InAppBilling#getProductDetails}.
+ * This is the success callback for [loadProductDetails]{@link module:InAppBilling#loadProductDetails}.
  * This will be called when process is successfully finished and will receive a list of valid and 
  * loaded products.
  *
  * Invalid products will not be on this list.
  * 
- * @callback getProductDetailsSuccessCallback
+ * @callback loadProductDetailsSuccessCallback
  * @param {Array.<ProductDetails>} products
  */
 
@@ -270,12 +270,12 @@ InAppBilling.prototype.getAvailableProducts = function(success, fail) {
  * Get details for a list of product ids. This will also load the products' 
  * details if they are not already loaded.
  * 
- * @param {getProductDetailsSuccessCallback} success    callback for successful query
+ * @param {loadProductDetailsSuccessCallback} success    callback for successful query
  * @param {errorCallback} fail  callback for failed query
  * @param {(String|Array.<String>)} productIds
  */
-InAppBilling.prototype.getProductDetails = function(success, fail, productIds) {
-    this.log('getProductDetails called!');
+InAppBilling.prototype.loadProductDetails = function(success, fail, productIds) {
+    this.log('loadProductDetails called!');
 
     if (typeof productIds === "string") {
         productIds = [productIds];
@@ -294,7 +294,7 @@ InAppBilling.prototype.getProductDetails = function(success, fail, productIds) {
         }
         this.log('load ' + JSON.stringify(productIds));
 
-        return cordova.exec(success, fail, "InAppBillingPlugin", "getProductDetails", [productIds]);
+        return cordova.exec(success, fail, "InAppBillingPlugin", "loadProductDetails", [productIds]);
     }
 };
 

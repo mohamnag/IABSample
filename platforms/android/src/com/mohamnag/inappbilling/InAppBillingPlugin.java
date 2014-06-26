@@ -162,14 +162,14 @@ public class InAppBillingPlugin extends CordovaPlugin {
                 }
 
             } // Get the list of loaded products
-            else if ("getAvailableProducts".equals(action)) {
+            else if ("getLoadedProducts".equals(action)) {
                 if (isReady(callbackContext)) {
-                    getAvailableProducts(callbackContext);
+                    getLoadedProducts(callbackContext);
                 }
             } // Get details of a loaded product
-            else if ("getProductDetails".equals(action)) {
+            else if ("loadProductDetails".equals(action)) {
                 if (isReady(callbackContext)) {
-                    getProductDetails(jsonStringToList(data.getString(0)), callbackContext);
+                    loadProductDetails(jsonStringToList(data.getString(0)), callbackContext);
                 }
             } // No handler for the action
             else {
@@ -271,7 +271,7 @@ public class InAppBillingPlugin extends CordovaPlugin {
 
                     // Now, let's get an inventory of stuff we own.
                     try {
-                        getProductDetails(productIds, callbackContext);
+                        loadProductDetails(productIds, callbackContext);
                     }
                     catch (JSONException e) {
                         jsLog(e.getMessage());
@@ -511,8 +511,8 @@ public class InAppBillingPlugin extends CordovaPlugin {
      *
      * @param callbackContext
      */
-    private void getAvailableProducts(CallbackContext callbackContext) throws JSONException {
-        jsLog("getAvailableProducts called.");
+    private void getLoadedProducts(CallbackContext callbackContext) throws JSONException {
+        jsLog("getLoadedProducts called.");
 
         if (isInventoryLoaded(callbackContext)) {
             callbackContext.success(myInventory.getAllProductsJSON());
@@ -526,8 +526,8 @@ public class InAppBillingPlugin extends CordovaPlugin {
      * @param productIds
      * @param callbackContext
      */
-    private void getProductDetails(final List<String> productIds, final CallbackContext callbackContext) throws JSONException {
-        jsLog("getProductDetails called.");
+    private void loadProductDetails(final List<String> productIds, final CallbackContext callbackContext) throws JSONException {
+        jsLog("loadProductDetails called.");
 
         // TODO: there maybe multiple productIds with a mixture of valid and invalid ones, lets think how we handle both of them!
         IabHelper.QueryInventoryFinishedListener invListener = new IabHelper.QueryInventoryFinishedListener() {

@@ -72,9 +72,9 @@ InAppBilling.prototype.ERR_CONSUMPTION_FAILED = ERROR_CODES_BASE + 20;
 
 
 // TODO: this shall be removed!
-var protectCall = function (callback, context) {
+var protectCall = function(callback, context) {
     try {
-        var args = Array.prototype.slice.call(arguments, 2); 
+        var args = Array.prototype.slice.call(arguments, 2);
         callback.apply(this, args);
     }
     catch (err) {
@@ -90,7 +90,7 @@ var protectCall = function (callback, context) {
  * @param {String} msg
  * @private
  */
-InAppBilling.prototype.log = function (msg) {
+InAppBilling.prototype.log = function(msg) {
     console.log("InAppBilling[js]: " + msg);
 };
 
@@ -118,7 +118,7 @@ InAppBilling.prototype._restoreCallbacks = {}
  * @param {Boolean=} options.showLog    [true] wether to show logs or not, this is strongly recommended to be set to false for production
  * @param {{(String|Array.<String>)}} productIds   an optional list of product IDs to load after initialization was successful
  */
-InAppBilling.prototype.init = function (success, fail, options, productIds) {
+InAppBilling.prototype.init = function(success, fail, options, productIds) {
     this.log('init called!');
     options || (options = {});
 
@@ -178,10 +178,10 @@ InAppBilling.prototype.init = function (success, fail, options, productIds) {
  * @param {getPurchasesSuccessCallback} success
  * @param {errorCallback} fail
  */
-InAppBilling.prototype.getPurchases = function (success, fail) {
+InAppBilling.prototype.getPurchases = function(success, fail) {
     this.log('getPurchases called!');
-    
-    cordova.exec(success, fail, "InAppPurchase", 'getPurchases', []);    
+
+    cordova.exec(success, fail, "InAppPurchase", 'getPurchases', []);
 };
 
 /**
@@ -195,14 +195,14 @@ InAppBilling.prototype.getPurchases = function (success, fail) {
 /**
  * Buys an item. The product should be loaded before this call. You can either 
  * load items at [init]{@link module:InAppBilling#init} or by calling 
- * [getProductDetails]{@link module:InAppBilling#getProductDetails}.
+ * [loadProductDetails]{@link module:InAppBilling#loadProductDetails}.
  * 
  * @param {buySuccessCallback} success  the callback for successful purchse
  * @param {errorCallback} fail  the callback for failed purchase
  * @param {string} productId    the product's ID to be bought
  */
 //TODO: sync fail and success callback params with android interface
-InAppBilling.prototype.buy = function (success, fail, productId) {
+InAppBilling.prototype.buy = function(success, fail, productId) {
     this.log('buy called!');
 
     cordova.exec(success, fail, "InAppPurchase", 'buy', [productId]);
@@ -211,7 +211,7 @@ InAppBilling.prototype.buy = function (success, fail, productId) {
 /**
  * Subscribes to an item. The product should be loaded before this call. 
  * You can either load items at [init]{@link module:InAppBilling#init} or by 
- * calling [getProductDetails]{@link module:InAppBilling#getProductDetails}.
+ * calling [loadProductDetails]{@link module:InAppBilling#loadProductDetails}.
  * 
  * on iOS, subscribing does exactly what buy does!
  * 
@@ -219,7 +219,7 @@ InAppBilling.prototype.buy = function (success, fail, productId) {
  * @param {errorCallback} fail  callback for failed subscription
  * @param {String} productId    id of the subscription item
  */
-InAppBilling.prototype.subscribe = function (success, fail, productId) {
+InAppBilling.prototype.subscribe = function(success, fail, productId) {
     this.log('subscribe called!');
 
     InAppBilling.buy(success, fail, productId);
@@ -251,24 +251,24 @@ InAppBilling.prototype.restore = function(success, fail) {
 };
 
 /* 
-TODO: complete this struc after syncing with android
-
-on iOS:
-    {
-        id: "<productId>",
-        title: "<localised title>",
-        description: "<localised escription>",
-        price: "<localised price>"
-    }
-*/
+ TODO: complete this struc after syncing with android
+ 
+ on iOS:
+ {
+ id: "<productId>",
+ title: "<localised title>",
+ description: "<localised escription>",
+ price: "<localised price>"
+ }
+ */
 /**
  * @typedef productDetails
  */
 
 /**
- * This is the success callback for [getProductDetails]{@link module:InAppBilling#getProductDetails}.
+ * This is the success callback for [loadProductDetails]{@link module:InAppBilling#loadProductDetails}.
  * 
- * @callback getProductDetailsSuccessCallback
+ * @callback loadProductDetailsSuccessCallback
  * @param {productDetails} product
  */
 
@@ -276,13 +276,13 @@ on iOS:
  * Get details for a list of product ids. This will also load the products' 
  * details if they are not already loaded.
  * 
- * @param {getProductDetailsSuccessCallback} success    callback for successful query
+ * @param {loadProductDetailsSuccessCallback} success    callback for successful query
  * @param {errorCallback} fail  callback for failed query
  * @param {(String|Array.<String>)} productIds
  */
 // TODO: shall we report back also the invalid products?
-InAppBilling.prototype.getProductDetails = function (success, fail, productIds) {
-    this.log('getProductDetails called!');
+InAppBilling.prototype.loadProductDetails = function(success, fail, productIds) {
+    this.log('loadProductDetails called!');
 
     if (typeof productIds === "string") {
         productIds = [productIds];
@@ -301,7 +301,7 @@ InAppBilling.prototype.getProductDetails = function (success, fail, productIds) 
         }
         this.log('load ' + JSON.stringify(productIds));
 
-        cordova.exec(success, fail, "InAppPurchase", "getProductDetails", [productIds]);
+        cordova.exec(success, fail, "InAppPurchase", "loadProductDetails", [productIds]);
     }
 
     return;
@@ -315,7 +315,7 @@ InAppBilling.prototype.getProductDetails = function (success, fail, productIds) 
  * @param  {[type]} productId
  * @return {[type]}
  */
-InAppBilling.prototype.consumePurchase = function (success, fail, productId) {
+InAppBilling.prototype.consumePurchase = function(success, fail, productId) {
     this.log('consumePurchase called!');
 
 
@@ -330,9 +330,10 @@ InAppBilling.prototype.consumePurchase = function (success, fail, productId) {
  * @param  {[type]} fail
  * @return {[type]}
  */
-InAppBilling.prototype.getAvailableProducts = function (success, fail) {
-    this.log('getAvailableProducts called!');
+InAppBilling.prototype.getLoadedProducts = function(success, fail) {
+    this.log('getLoadedProducts called!');
 
+    //TODO: rename this to getLoadedProducts
 
     //TODO: implement this for iOS!
     // return cordova.exec(success, fail, "InAppBillingPlugin", "getAvailableProducts", ["null"]);

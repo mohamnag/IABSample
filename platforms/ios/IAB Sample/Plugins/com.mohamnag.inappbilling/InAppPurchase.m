@@ -216,7 +216,7 @@ static NSString *jsErrorCodeAsString(NSInteger code) {
  * @param {(CDVInvokedUrlCommand*} command
  */
 -(void) init: (CDVInvokedUrlCommand*)command {
-    // TODO: get an optional list of productIds and pass it further to be loaded in getProductDetails
+    // TODO: get an optional list of productIds and pass it further to be loaded in loadProductDetails
 
     [self jsLog:@"init called"];
 
@@ -235,7 +235,7 @@ static NSString *jsErrorCodeAsString(NSInteger code) {
         [self jsLog:@"InAppBilling initialized successfully"];
 
         // now we load products, if any is passed
-        [self getProductDetails:command];     
+        [self loadProductDetails:command];     
 
         // CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
         // [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];      
@@ -463,8 +463,8 @@ static NSString *jsErrorCodeAsString(NSInteger code) {
  * 
  * @param {(CDVInvokedUrlCommand*} command
  */
-- (void) getProductDetails: (CDVInvokedUrlCommand*)command {
-    [self jsLog:@"getProductDetails called"];
+- (void) loadProductDetails: (CDVInvokedUrlCommand*)command {
+    [self jsLog:@"loadProductDetails called"];
 
     NSArray *inArray = [command.arguments objectAtIndex:0];
 

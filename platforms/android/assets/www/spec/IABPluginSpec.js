@@ -249,7 +249,7 @@ describe('InAppBilling', function() {
 
     });
 
-    describe('getProductDetails', function() {
+    describe('loadProductDetails', function() {
         beforeEach(function(done) {
             // we definitly need a working but empty plugin!
             inappbilling.init(function() {
@@ -258,7 +258,7 @@ describe('InAppBilling', function() {
         });
 
         it('should load a single new product', function(done) {
-            inappbilling.getProductDetails(
+            inappbilling.loadProductDetails(
                     function(products) {
                         expect(products.length).toEqual(1);
                         expect(products[0]).toImplement(ProductDetails);
@@ -274,7 +274,7 @@ describe('InAppBilling', function() {
         });
 
         it('should load multiple products', function(done) {
-            inappbilling.getProductDetails(
+            inappbilling.loadProductDetails(
                     function(products) {
                         expect(products.length).toEqual(2);
                         expect(products[0]).toImplement(ProductDetails);
@@ -303,7 +303,7 @@ describe('InAppBilling', function() {
 
         it('should not load invalid products', function(done) {
 
-            inappbilling.getProductDetails(
+            inappbilling.loadProductDetails(
                     function(products) {
                         expect(products.length).toEqual(0);
                         done();
@@ -318,11 +318,18 @@ describe('InAppBilling', function() {
 
         });
 
-
-
     });
 
-    describe('getAvailableProducts', function() {
+    describe('getLoadedProducts', function() {
+        
+        beforeEach(function(done) {
+            // we definitly need a working but empty plugin!
+            inappbilling.init(function() {
+                done();
+            });
+        });
+        
+        xit('inventory should be empty before loading products');
         xit('should not remove existing products when loading new ones');
     });
 
