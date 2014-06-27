@@ -80,6 +80,7 @@ customMatchers = {
  *  -   following in-app purchasing items should have been defined and published:
  *      * test_product_1    (Managed)
  *      * test_product_2    (Unmanaged)
+ *      * test_never_bought_product    (Unmanaged)
  *      * test_subscription_1    (Non-free subscription)
  *      
  *  -   following in-app purchasing item should NOT be defined:
@@ -100,7 +101,7 @@ describe('InAppBilling', function() {
     };
 
     // the structure passed to error callback.
-    var errorObject = {
+    var ErrorObject = {
         errorCode: 1,
         msg: "",
         nativeEvent: {}
@@ -577,12 +578,26 @@ describe('InAppBilling', function() {
                 done();
             }, function(error) {
                 expect(error).toBeDefined();
-                expect(error).toImplement(errorObject);
+                expect(error).toImplement(ErrorObject);
                 expect(error.errorCode).toEqual(inappbilling.ERR_PRODUCT_NOT_LOADED);
 
                 done();
 
             }, 'test_product_1');
+        });
+
+        it('should not allow subscribing to not loaded products', function(done) {
+            inappbilling.buy(function() {
+                fail();
+                done();
+            }, function(error) {
+                expect(error).toBeDefined();
+                expect(error).toImplement(ErrorObject);
+                expect(error.errorCode).toEqual(inappbilling.ERR_PRODUCT_NOT_LOADED);
+
+                done();
+
+            }, 'test_subscription_1');
         });
 
         it('should let buy an existing loaded product', function(done) {
@@ -643,7 +658,7 @@ describe('InAppBilling', function() {
                     done();
                 }, function(error) {
                     expect(error).toBeDefined();
-                    expect(error).toImplement(errorObject);
+                    expect(error).toImplement(ErrorObject);
                     expect(error.errorCode).toEqual(inappbilling.ERR_PAYMENT_CANCELLED);
 
                     done();
@@ -661,14 +676,433 @@ describe('InAppBilling', function() {
 
     describe('getVerificationPayload', function() {
 
-        xit('should return same payload as on purchase time');
+        beforeEach(function(done) {
+            // we definitly need a working but empty plugin!
+            inappbilling.init(function() {
+                done();
+            });
+
+            // increase timeout to 5min, as some of these test cases need user input
+            originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
+            jasmine.DEFAULT_TIMEOUT_INTERVAL = 300000;
+        });
+
+        afterEach(function() {
+            jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
+        });
+
+        it('should return same payload later as on purchase time', function(done) {
+            alert('Please FINISH this payment, you have max 5 min time!');
+
+            inappbilling.loadProductDetails(function() {
+
+                // buy
+                inappbilling.buy(function(purchase) {
+                    expect(purchase.productId).toEqual('test_product_1');
+                    var orgPayload = purchase.verificationPayload;
+
+                    // re-init plugin
+                    inappbilling.init(function() {
+
+                        // get verification payload for the purchase
+                        inappbilling.getVerificationPayload(function(payload) {
+                            expect(payload).toBeDefined();
+                            expect(payload).toEqual(orgPayload);
+
+                            done();
+
+                        }, function() {
+                            fail();
+                            done();
+
+                        }, purchase.id);
+
+                    }, function() {
+                        fail();
+                        done();
+
+                    }, {}, 'test_product_1');
+
+                }, function() {
+                    fail();
+                    done();
+                }, 'test_product_1');
+
+            }, function() {
+                fail();
+                done();
+            }, 'test_product_1');
+
+        });
+
+        it('should not return payload for invalid purchase id', function(done) {
+            alert('Please FINISH this payment, you have max 5 min time!');
+
+            inappbilling.loadProductDetails(function() {
+
+                // buy
+                inappbilling.buy(function(purchase) {
+                    expect(purchase.productId).toEqual('test_product_1');
+
+                    // re-init
+                    inappbilling.init(function() {
+
+                        // get verification payload
+                        inappbilling.getVerificationPayload(function() {
+                            fail();
+                            done();
+
+                        }, function(err) {
+                            expect(err).toBeDefined();
+                            expect(err).toImplement(ErrorObject);
+                            expect(err.errorCode).toBe(inappbilling.ERR_INVALID_PURCHASE_ID);
+
+                            done();
+
+                        }, purchase.id + 'make_it_invalid');
+
+                    }, function() {
+                        fail();
+                        done();
+
+                    }, {}, 'test_product_1');
+
+                }, function() {
+                    fail();
+                    done();
+                }, 'test_product_1');
+
+            }, function() {
+                fail();
+                done();
+            }, 'test_product_1');
+
+        });
 
     });
 
     describe('getPurchases', function() {
+
+        beforeEach(function(done) {
+            // we definitly need a working but empty plugin!
+            inappbilling.init(function() {
+                done();
+            });
+
+            // increase timeout to 5min, as some of these test cases need user input
+            originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
+            jasmine.DEFAULT_TIMEOUT_INTERVAL = 300000;
+        });
+
+        afterEach(function() {
+            jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
+        });
+
+        it('should be able to get purchase from one payment', function(done) {
+            alert('Please FINISH this payment, you have max 5 min time!');
+
+            inappbilling.loadProductDetails(function() {
+
+                // buy
+                inappbilling.buy(function(purchase) {
+                    expect(purchase.productId).toEqual('test_product_1');
+
+                    // re-init plugin
+                    inappbilling.init(function() {
+
+                        // get purchases
+                        inappbilling.getPurchases(function(purchases) {
+                            expect(purchases).toBeArray();
+                            expect(purchases.length).toBeGreaterThan(1);
+                            expect(purchases[purchases.length - 1]).toImplement(PurchaseObject);
+                            expect(purchases[purchases.length - 1].productId).toEqual('test_product_1');
+
+                            done();
+
+                        }, function() {
+                            fail();
+                            done();
+
+                        }, purchase.id);
+
+                    }, function() {
+                        fail();
+                        done();
+
+                    }, {}, 'test_product_1');
+
+                }, function() {
+                    fail();
+                    done();
+                }, 'test_product_1');
+
+            }, function() {
+                fail();
+                done();
+            }, 'test_product_1');
+        });
+
+        it('should be able to get purchase from one subscription', function(done) {
+            alert('Please FINISH this payment, you have max 5 min time!');
+
+            inappbilling.loadProductDetails(function() {
+
+                // buy
+                inappbilling.buy(function(purchase) {
+                    expect(purchase.productId).toEqual('test_subscription_1');
+
+                    // re-init plugin
+                    inappbilling.init(function() {
+
+                        // get purchases
+                        inappbilling.getPurchases(function(purchases) {
+                            expect(purchases).toBeArray();
+                            expect(purchases.length).toBeGreaterThan(1);
+                            expect(purchases[purchases.length - 1]).toImplement(PurchaseObject);
+                            expect(purchases[purchases.length - 1].productId).toEqual('test_subscription_1');
+
+                            done();
+
+                        }, function() {
+                            fail();
+                            done();
+
+                        }, purchase.id);
+
+                    }, function() {
+                        fail();
+                        done();
+
+                    }, {}, 'test_subscription_1');
+
+                }, function() {
+                    fail();
+                    done();
+                }, 'test_subscription_1');
+
+            }, function() {
+                fail();
+                done();
+            }, 'test_subscription_1');
+        });
+
+        it('should be able to get purchases from multiple payments', function(done) {
+            /* sorry to break test independency, but at this point we have 
+             * bought products that can not be bought again!
+             */
+            inappbilling.getPurchases(function(purchases) {
+                expect(purchases).toBeArray();
+                expect(purchases.length).toBeGreaterThan(2);
+
+                expect(purchases[purchases.length - 2]).toImplement(PurchaseObject);
+                expect(purchases[purchases.length - 2].productId).toEqual('test_product_1');
+
+                expect(purchases[purchases.length - 1]).toImplement(PurchaseObject);
+                expect(purchases[purchases.length - 1].productId).toEqual('test_subscription_1');
+
+                done();
+
+            }, function() {
+                fail();
+                done();
+
+            }, purchase.id);
+        });
+
+        it('should not return purchases from canceled payments', function(done) {
+
+            alert('Please ACNCEL this payment, you have max 5 min time!');
+
+            inappbilling.loadProductDetails(function() {
+
+                // buy
+                inappbilling.buy(function(purchase) {
+                    expect(purchase.productId).toEqual('test_product_2');
+
+                    // get purchases
+                    inappbilling.getPurchases(function(purchases) {
+                        if (purchases.length > 0) {
+                            expect(purchases[purchases.length - 1]).toImplement(PurchaseObject);
+                            expect(purchases[purchases.length - 1].productId).not.toEqual('test_product_2');
+                        }
+
+                        done();
+
+                    }, function() {
+                        fail();
+                        done();
+
+                    }, purchase.id);
+
+
+                }, function() {
+                    fail();
+                    done();
+                }, 'test_product_2');
+
+            }, function() {
+                fail();
+                done();
+            }, 'test_product_2');
+
+        });
+
     });
 
-    describe('consumePurchase', function() {
+    describe('consumeProduct', function() {
+
+        it('should not allow cunsumption of a not owned product', function(done) {
+            inappbilling.loadProductDetails(function() {
+
+                inappbilling.consumeProduct(function(purchase) {
+                    expect(purchase).toBeDefined();
+                    expect(purchase).toImplement(PurchaseObject);
+                    expect(purchase.productId).toEqual('test_never_bought_product');
+
+                    done();
+
+                }, function() {
+                    fail();
+                    done();
+
+                }, 'test_never_bought_product');
+
+            }, function() {
+                fail();
+                done();
+            }, 'test_never_bought_product');
+        });
+
+        it('should let cunsume an owned product', function(done) {
+
+            inappbilling.getPurchases(function(purchases) {
+                expect(purchases).toBeDefined();
+                expect(purchases.length).toBeGreaterThan(0);
+
+                inappbilling.consumeProduct(function(purchase) {
+                    expect(purchase).toBeDefined();
+                    expect(purchase).toImplement(PurchaseObject);
+                    expect(purchase.id).toEqual(purchases[0].id);
+                    expect(purchase.prductId).toEqual(purchases[0].prductId);
+
+                    done();
+
+                }, function() {
+                    fail();
+                    done();
+                }, purchases[0].productId);
+
+
+            }, function() {
+                fail();
+                done();
+            });
+
+        });
+
+        it('should not allow cunsumption of a product twice', function(done) {
+            alert('Please FINISH this payment, you have max 5 min time!');
+
+            inappbilling.loadProductDetails(function() {
+
+                // buy
+                inappbilling.buy(function(purchase) {
+                    expect(purchase.productId).toEqual('test_product_1');
+
+                    // consume
+                    inappbilling.consumeProduct(function(purchase) {
+                        expect(purchase).toBeDefined();
+                        expect(purchase.prductId).toEqual('test_product_1');
+
+                        // retry consume
+                        inappbilling.consumeProduct(function() {
+                            fail();
+                            done();
+
+                        }, function(err) {
+                            expect(err).toBeDefined();
+                            expect(err).toImplement(ErrorObject);
+                            expect(err.errorCode).toEqual(inappbilling.ERR_CONSUME_NOT_OWNED_ITEM);
+
+                            done();
+
+                        }, 'test_product_1');
+
+                    }, function() {
+                        fail();
+                        done();
+                    }, 'test_product_1');
+
+
+                }, function() {
+                    fail();
+                    done();
+                }, 'test_product_1');
+
+            }, function() {
+                fail();
+                done();
+            }, 'test_product_1');
+        });
+
+        it('should not return a purchase after cunsumption anymore', function(done) {
+            alert('Please FINISH this payment, you have max 5 min time!');
+
+            inappbilling.loadProductDetails(function() {
+
+                // buy
+                inappbilling.buy(function(purchase) {
+                    expect(purchase.productId).toEqual('test_product_1');
+
+                    // check purchases
+                    inappbilling.getPurchases(function(purchases) {
+                        expect(purchases).toBeDefined();
+                        expect(purchases[purchases.length - 1].productId).toBeEqual('test_product_1');
+                        var oldCount = purchases.length;
+                        
+                        // consume
+                        inappbilling.consumeProduct(function(purchase) {
+                            expect(purchase).toBeDefined();
+                            expect(purchase.prductId).toEqual('test_product_1');
+
+                            // check purchases
+                            inappbilling.consumeProduct(function(purchases) {
+                                expect(purchases).toBeDefined();
+                                expect(purchases.length).toBeLessThan(oldCount);
+                                
+                                for(i = 0; i < purchases.length; i++) {
+                                    expect(purchases[i].productId).not.toBeEqual('test_product_1');
+                                }
+
+                            }, function() {
+                                fail();
+                                done();
+
+                            }, 'test_product_1');
+
+                        }, function() {
+                            fail();
+                            done();
+                        }, 'test_product_1');
+
+                    }, function() {
+                        fail();
+                        done();
+                    });
+
+
+                }, function() {
+                    fail();
+                    done();
+                }, 'test_product_1');
+
+            }, function() {
+                fail();
+                done();
+            }, 'test_product_1');
+
+        });
+
     });
 
 });
