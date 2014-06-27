@@ -212,6 +212,8 @@ InAppBilling.prototype.buy = function(success, fail, productId) {
     cordova.exec(success, fail, "InAppPurchase", 'buy', [productId]);
 };
 
+
+// TODO: remove subscription!
 /**
  * Subscribes to an item. The product should be loaded before this call. 
  * You can either load items at [init]{@link module:InAppBilling#init} or by 

@@ -192,9 +192,9 @@ InAppBilling.prototype.getPurchases = function(success, fail) {
  */
 
 /**
- * Buys an item. The product should be loaded before this call. You can either 
- * load items at [init]{@link module:InAppBilling#init} or by calling 
- * [loadProductDetails]{@link module:InAppBilling#loadProductDetails}.
+ * Buy or subscribe to an item. The product should be loaded before this call. 
+ * You can either load items at [init]{@link module:InAppBilling#init} or by 
+ * calling [loadProductDetails]{@link module:InAppBilling#loadProductDetails}.
  * 
  * @param {buySuccessCallback} success  the callback for successful purchse
  * @param {errorCallback} fail  the callback for failed purchase
@@ -203,20 +203,6 @@ InAppBilling.prototype.getPurchases = function(success, fail) {
 InAppBilling.prototype.buy = function(success, fail, productId) {
     this.log('buy called!');
     return cordova.exec(success, fail, "InAppBillingPlugin", "buy", [productId]);
-};
-
-/**
- * Subscribes to an item. The product should be loaded before this call. 
- * You can either load items at [init]{@link module:InAppBilling#init} or by 
- * calling [loadProductDetails]{@link module:InAppBilling#loadProductDetails}.
- * 
- * @param {buySuccessCallback} success  callback for successful subscription
- * @param {errorCallback} fail  callback for failed subscription
- * @param {String} productId    id of the subscription item
- */
-InAppBilling.prototype.subscribe = function(success, fail, productId) {
-    this.log('subscribe called!');
-    return cordova.exec(success, fail, "InAppBillingPlugin", "subscribe", [productId]);
 };
 
 /**

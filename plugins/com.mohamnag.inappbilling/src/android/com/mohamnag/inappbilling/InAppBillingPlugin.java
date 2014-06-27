@@ -23,6 +23,7 @@ import com.mohamnag.inappbilling.helper.Inventory;
 import com.mohamnag.inappbilling.helper.SkuDetails;
 
 import android.content.Intent;
+import static com.mohamnag.inappbilling.helper.IabHelper.IABHELPER_SUBSCRIPTIONS_NOT_AVAILABLE;
 
 public class InAppBillingPlugin extends CordovaPlugin {
 
@@ -150,16 +151,6 @@ public class InAppBillingPlugin extends CordovaPlugin {
                     buy(data.getString(0), payload, callbackContext);
                 }
 
-            } // Subscribe to an item
-            else if ("subscribe".equals(action)) {
-                if (isReady(callbackContext)) {
-                    String payload = "";
-                    if (data.length() > 1) {
-                        payload = data.getString(1);
-                    }
-
-                    subscribe(data.getString(0), payload, callbackContext);
-                }
             } // consume an owned item
             else if ("consumePurchase".equals(action)) {
                 if (isReady(callbackContext)) {
@@ -338,7 +329,7 @@ public class InAppBillingPlugin extends CordovaPlugin {
 
             return;
         }
-        
+
         // TODO: we have to check if to-be-purchased product is already loaded or not.
         this.cordova.setActivityResultCallback(this);
 
@@ -356,7 +347,14 @@ public class InAppBillingPlugin extends CordovaPlugin {
                                     ERR_PAYMENT_CANCELLED,
                                     "Purchase cancelled by user.",
                                     result
-                            ));                            
+                            ));
+                        }
+                        else if (result.getResponse() == IabHelper.IABHELPER_SUBSCRIPTIONS_NOT_AVAILABLE) {
+                            callbackContext.error(ErrorEvent.buildJson(
+                                    ERR_SUBSCRIPTION_NOT_SUPPORTED,
+                                    "Product intended to be bought has not been loaded.",
+                                    result
+                            ));
                         }
                         else if (result.isFailure()) {
                             callbackContext.error(ErrorEvent.buildJson(
@@ -406,84 +404,6 @@ public class InAppBillingPlugin extends CordovaPlugin {
                 prchListener,
                 payload
         );
-    }
-
-    /**
-     * Subscribe to an already loaded item.
-     *
-     * @param productId
-     * @param payload
-     * @param callbackContext
-     */
-    private void subscribe(final String productId, final String payload, final CallbackContext callbackContext) throws JSONException {
-        jsLog("subscribe called for productId: " + productId + " payload: " + payload);
-
-        if (!mHelper.subscriptionsSupported()) {
-            callbackContext.error(ErrorEvent.buildJson(
-                    ERR_SUBSCRIPTION_NOT_SUPPORTED,
-                    "Subscriptions not supported on device.",
-                    null
-            ));
-        }
-        else {
-            this.cordova.setActivityResultCallback(this);
-            jsLog("Launching purchase flow for subscription.");
-
-            IabHelper.OnIabPurchaseFinishedListener subsListener = new IabHelper.OnIabPurchaseFinishedListener() {
-                @Override
-                public void onIabPurchaseFinished(IabResult result, Purchase purchase) {
-                    jsLog("Subscription finished: " + result + ", purchase: " + purchase);
-
-                    try {
-                        if (isReady(callbackContext)) {
-                            if (result.isFailure()) {
-                                callbackContext.error(ErrorEvent.buildJson(
-                                        ERR_PURCHASE_FAILED,
-                                        "Subscription failed",
-                                        result
-                                ));
-                            }
-                            else if (!payload.equals(purchase.getDeveloperPayload())) {
-                                callbackContext.error(ErrorEvent.buildJson(
-                                        ERR_INVALID_PURCHASE_PAYLOAD,
-                                        "Developer payload verification failed.",
-                                        result
-                                ));
-                            }
-                            else {
-                                jsLog("Subscription successful.");
-
-                                // add the purchase to the inventory
-                                myInventory.addPurchase(purchase);
-
-                                try {
-                                    callbackContext.success(new JSONObject(purchase.getOriginalJson()));
-                                }
-                                catch (JSONException e) {
-                                    callbackContext.error(ErrorEvent.buildJson(
-                                            ERR_JSON_CONVERSION_FAILED,
-                                            "Could not create JSON object from purchase object",
-                                            result
-                                    ));
-                                }
-                            }
-                        }
-                    }
-                    catch (JSONException e) {
-                        jsLog(e.getMessage());
-                    }
-                }
-            };
-
-            mHelper.launchPurchaseFlow(
-                    cordova.getActivity(),
-                    productId,
-                    IabHelper.ITEM_TYPE_SUBS,
-                    RC_REQUEST_BASE++,
-                    subsListener,
-                    payload
-            );
-        }
     }
 
     /**
