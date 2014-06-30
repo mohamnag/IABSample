@@ -1,0 +1,7 @@
+phonegap plugin remove com.mohamnag.inappbilling
+phonegap plugin add ../InAppBilling/
+rm platforms/android/ant-build/HelloWorld-release.apk
+platforms/android/cordova/build --release
+adb uninstall com.mohamnag.iabsample
+adb install -r platforms/android/ant-build/HelloWorld-release.apk
+adb shell am start -n com.mohamnag.iabsample/.HelloWorld
