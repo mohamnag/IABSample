@@ -71,8 +71,10 @@ InAppBilling.prototype.ERR_CONSUME_NOT_OWNED_ITEM = ERROR_CODES_BASE + 19;
 InAppBilling.prototype.ERR_CONSUMPTION_FAILED = ERROR_CODES_BASE + 20;
 // the prduct to be bought is not loaded
 InAppBilling.prototype.ERR_PRODUCT_NOT_LOADED = ERROR_CODES_BASE + 21;
-// invalid product ids passed
+// invalid product id passed
 InAppBilling.prototype.ERR_INVALID_PRODUCT_ID = ERROR_CODES_BASE + 22;
+// invalid purchase id passed
+InAppBilling.prototype.ERR_INVALID_PURCHASE_ID = ERROR_CODES_BASE + 23;
 
 /**
  * This function accepts and outputs all the logs, both from native and from JS
@@ -166,8 +168,9 @@ InAppBilling.prototype.init = function(success, fail, options, productIds) {
  */
 
 /**
- * This will return bought products that are not cunsumed or the subscriptions 
- * that are not expired. Following items will not appear on this list:
+ * This will return bought products in a chronological order (oldest first)
+ * that are not cunsumed or the subscriptions that are not expired. Following 
+ * items will **not** appear on this list:
  * - consumable products which has been consumed
  * - products which have been cancelled (as possible in iOS)
  * - subscriptions that are expired
@@ -206,22 +209,22 @@ InAppBilling.prototype.buy = function(success, fail, productId) {
 };
 
 /**
- * This is the callback for {@link module:InAppBilling#consumePurchase}
+ * This is the callback for {@link module:InAppBilling#consumeProduct}
  * 
- * @callback consumePurchaseSuccessCallback
+ * @callback consumeProductSuccessCallback
  * @param {Purchase} purchase
  */
 
 /**
  * Consume an item. The product should be of consumable type.
  * 
- * @param {consumePurchaseSuccessCallback} success callback for successful consumption
+ * @param {consumeProductSuccessCallback} success callback for successful consumption
  * @param {type} fail   callback for failed consumption
  * @param {type} productId  id of the already bought product (not the purchase itself)
  */
-InAppBilling.prototype.consumePurchase = function(success, fail, productId) {
-    this.log('consumePurchase called!');
-    return cordova.exec(success, fail, "InAppBillingPlugin", "consumePurchase", [productId]);
+InAppBilling.prototype.consumeProduct = function(success, fail, productId) {
+    this.log('consumeProduct called!');
+    return cordova.exec(success, fail, "InAppBillingPlugin", "consumeProduct", [productId]);
 };
 
 /**

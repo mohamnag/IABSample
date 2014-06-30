@@ -23,7 +23,6 @@ import com.mohamnag.inappbilling.helper.Inventory;
 import com.mohamnag.inappbilling.helper.SkuDetails;
 
 import android.content.Intent;
-import static com.mohamnag.inappbilling.helper.IabHelper.IABHELPER_SUBSCRIPTIONS_NOT_AVAILABLE;
 
 public class InAppBillingPlugin extends CordovaPlugin {
 
@@ -69,20 +68,6 @@ public class InAppBillingPlugin extends CordovaPlugin {
     private final Boolean ENABLE_DEBUG_LOGGING = true;
 
     private final String TAG = "CORDOVA_BILLING";
-
-    //TODO: move it to config file: https://github.com/poiuytrez/AndroidInAppBilling/pull/52/files
-    /* base64EncodedPublicKey should be YOUR APPLICATION'S PUBLIC KEY
-     * (that you got from the Google Play developer console). This is not your
-     * developer public key, it's the *app-specific* public key.
-     *
-     * Instead of just storing the entire literal string here embedded in the
-     * program,  construct the key at runtime from pieces or
-     * use bit manipulation (for example, XOR with some other string) to hide
-     * the actual key.  The key itself is not secret information, but we don't
-     * want to make it easy for an attacker to replace the public key with one
-     * of their own and then fake messages from the server.
-     */
-    private final String base64EncodedPublicKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAogC9VXkak0pUlNZLpT90jKyejwrsd6ASjL1wuIJgpk3TyoOEYR3aUdthTfVEnqsEdOWNb/uc0CsFfsnGIchiQmiL3oSM7WFpC4/zWVYl8M+oe3BWczEMKSC7XR/XXjsnK7dMWvPFkProF9+4yDCHy+zpPT0HKP0UZOp0GTNGjgKP2SIye0Whx985vo6edsrKeNe7aZZS63N8X6bRIMAHKgyO4vowZJn+QYGzHh9ZSknExfJFqBKhMr5ytI2shhzFMx0tQPd76SKjIRZ8e6iQAyJkMjLnCBbhfB4FoguSXijB4PCZxTJ0fmO6OGIhWf3hz/wLRapGlRXtEuV2HVTH5QIDAQAB";
 
     /**
      * request code base for the purchase flow
@@ -152,9 +137,9 @@ public class InAppBillingPlugin extends CordovaPlugin {
                 }
 
             } // consume an owned item
-            else if ("consumePurchase".equals(action)) {
+            else if ("consumeProduct".equals(action)) {
                 if (isReady(callbackContext)) {
-                    consumePurchase(data.getString(0), callbackContext);
+                    consumeProduct(data.getString(0), callbackContext);
                 }
 
             } // Get the list of loaded products
@@ -226,8 +211,10 @@ public class InAppBillingPlugin extends CordovaPlugin {
 
         // Some sanity checks to see if the developer (that's you!) really followed the
         // instructions to run this plugin
-        if (base64EncodedPublicKey.contains("CONSTRUCT_YOUR")) {
-            throw new RuntimeException("Please put your app's public key in InAppBillingPlugin.java. See ReadMe.");
+        String base64EncodedPublicKey = cordova.getActivity().getIntent().getStringExtra("android-iabplugin-license-key");
+        
+        if (base64EncodedPublicKey == null) {
+            throw new RuntimeException("Please put your app's public key in config.xml. See ReadMe.");
         }
 
         // Create the helper, passing it our context and the public key to verify signatures with
@@ -533,8 +520,8 @@ public class InAppBillingPlugin extends CordovaPlugin {
      * @param productId
      * @param callbackContext
      */
-    private void consumePurchase(final String productId, final CallbackContext callbackContext) throws JSONException {
-        jsLog("consumePurchase called.");
+    private void consumeProduct(final String productId, final CallbackContext callbackContext) throws JSONException {
+        jsLog("consumeProduct called.");
 
         if (isInventoryLoaded(callbackContext)) {
 
