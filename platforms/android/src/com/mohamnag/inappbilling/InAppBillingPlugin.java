@@ -121,7 +121,7 @@ public class InAppBillingPlugin extends CordovaPlugin {
 
                 init(productIds, callbackContext);
             } // Get the list of purchases
-            else if ("getPurchases".equals(action)) {
+            else if ("getPurchases".equals(action) || "restoreCompletedTransactions".equals(action)) {
                 if (isReady(callbackContext)) {
                     getPurchases(callbackContext);
                 }

@@ -1,7 +1,7 @@
 cordova.define('cordova/plugin_list', function(require, exports, module) {
 module.exports = [
     {
-        "file": "plugins/com.mohamnag.inappbilling/www/android_iab.js",
+        "file": "plugins/com.mohamnag.inappbilling/www/inappbilling.js",
         "id": "com.mohamnag.inappbilling.InAppBilling",
         "clobbers": [
             "inappbilling"
@@ -11,7 +11,7 @@ module.exports = [
 module.exports.metadata = 
 // TOP OF METADATA
 {
-    "com.mohamnag.inappbilling": "0.0.1"
+    "com.mohamnag.inappbilling": "0.0.2"
 }
 // BOTTOM OF METADATA
 });

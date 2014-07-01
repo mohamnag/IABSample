@@ -19,7 +19,7 @@
                 "parents": {
                     "/*": [
                         {
-                            "xml": "<feature name=\"InAppPurchase\"><param name=\"ios-package\" value=\"InAppPurchase\" /></feature>",
+                            "xml": "<feature name=\"InAppBillingPlugin\"><param name=\"ios-package\" value=\"InAppPurchase\" /></feature>",
                             "count": 1
                         }
                     ]

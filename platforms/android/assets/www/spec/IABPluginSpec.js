@@ -97,9 +97,18 @@ customMatchers = {
  *      
  *  -   following in-app purchasing item should NOT be defined:
  *      * not_existing_product_id
+ *      
+ *      
+ *  IMPORTANT: 
+ *              I did include subscription tests, but they should not be tested
+ *              as this will not be treated as test purchases. The only way is 
+ *              to test them and then make a refund from mechant account 
+ *              afterwards. Im not sure how Google will like it to happen 
+ *              multiple times during testing!
  */
 
 describe('InAppBilling', function() {
+    var testSubscriptions = false;
 
     // the structure for product details
     var ProductDetails = {
@@ -157,7 +166,7 @@ describe('InAppBilling', function() {
 
     describe('init', function() {
         var success, failCallback;
-        var delayForInitReaction = 1000;
+        var delayForInitReaction = 1500;
 
         beforeEach(function() {
             success = jasmine.createSpy('success');
@@ -167,8 +176,6 @@ describe('InAppBilling', function() {
         it('should initialize without products list', function(done) {
             inappbilling.init(success, function(err) {
                 expect({}).toFailWithMessage(err.msg);
-            }, {
-                showLog: true
             });
 
             setTimeout(function() {
@@ -183,7 +190,7 @@ describe('InAppBilling', function() {
             inappbilling.init(success, function() {
                 fail();
                 done();
-            }, {}, [
+            }, {showLog:true}, [
                 "test_product_1",
                 "test_product_2"
             ]);
@@ -204,11 +211,9 @@ describe('InAppBilling', function() {
         });
 
         it('should initialize even with not existing product', function(done) {
-            inappbilling.init(success, failCallback, {},
-                    [
-                        "not_existing_product_id"
-                    ]
-                    );
+            inappbilling.init(success, failCallback, {}, [
+                "not_existing_product_id"
+            ]);
 
             setTimeout(function() {
                 expect(success).toHaveBeenCalled();
@@ -335,21 +340,23 @@ describe('InAppBilling', function() {
 
         });
 
-        it('should load a single subscription', function(done) {
-            inappbilling.loadProductDetails(function(products) {
-                expect(products.length).toEqual(1);
-                expect(products[0]).toImplement(ProductDetails);
-                expect(products[0].id).toEqual("test_subscription_1");
-                expect(products[0].type).toEqual("subs");
-                done();
+        if (!!testSubscriptions) {
+            it('should load a single subscription', function(done) {
+                inappbilling.loadProductDetails(function(products) {
+                    expect(products.length).toEqual(1);
+                    expect(products[0]).toImplement(ProductDetails);
+                    expect(products[0].id).toEqual("test_subscription_1");
+                    expect(products[0].type).toEqual("subs");
+                    done();
 
-            }, function() {
-                fail();
-                done();
+                }, function() {
+                    fail();
+                    done();
 
-            }, 'test_subscription_1');
+                }, 'test_subscription_1');
 
-        });
+            });
+        }
 
         it('should load multiple products', function(done) {
             inappbilling.loadProductDetails(function(products) {
@@ -630,8 +637,8 @@ describe('InAppBilling', function() {
 
                     done();
 
-                }, function() {
-                    fail();
+                }, function(err) {
+                    expect({}).toFailWithMessage('Buying test_product_1 failed ' + err.msg);
                     done();
                 }, 'test_product_1');
 
@@ -642,29 +649,32 @@ describe('InAppBilling', function() {
 
         });
 
-        it('should let subscribe to an existing loaded product', function(done) {
-            alert('Please FINISH this subscription, you have max 5 min time!');
+        if (!!testSubscriptions) {
+            it('should let subscribe to an existing loaded product', function(done) {
+                alert('Please FINISH this subscription, you have max 5 min time!');
 
-            inappbilling.loadProductDetails(function() {
+                inappbilling.loadProductDetails(function() {
 
-                inappbilling.buy(function(purchase) {
-                    expect(purchase).toBeDefined();
-                    expect(purchase).toImplement(NewPurchaseObject);
-                    expect(purchase.productId).toEqual('test_subscription_1');
+                    inappbilling.buy(function(purchase) {
+                        expect(purchase).toBeDefined();
+                        expect(purchase).toImplement(NewPurchaseObject);
+                        expect(purchase.productId).toEqual('test_subscription_1');
 
+                        done();
+
+                    }, function(err) {
+                        expect({}).toFailWithMessage("Could not buy the product: test_subscription_1 " + err.msg);
+                        done();
+
+                    }, 'test_subscription_1');
+
+                }, function(err) {
+                    expect({}).toFailWithMessage("Could not load product: test_subscription_1 " + err.msg);
                     done();
+                }, 'test__1');
 
-                }, function() {
-                    fail();
-                    done();
-                }, 'test_subscription_1');
-
-            }, function() {
-                fail();
-                done();
-            }, 'test_subscription_1');
-
-        });
+            });
+        }
 
         it('should handle cancelled payment correctly', function(done) {
             alert('Please CANCEL this payment, you have max 5 min time!');
@@ -860,49 +870,51 @@ describe('InAppBilling', function() {
             }, 'test_product_1');
         });
 
-        it('should be able to get purchase from one subscription', function(done) {
-            alert('Please FINISH this payment, you have max 5 min time!');
+        if (!!testSubscriptions) {
+            it('should be able to get purchase from one subscription', function(done) {
+                alert('Please FINISH this payment, you have max 5 min time!');
 
-            inappbilling.loadProductDetails(function() {
+                inappbilling.loadProductDetails(function() {
 
-                // buy
-                inappbilling.buy(function(purchase) {
-                    expect(purchase.productId).toEqual('test_subscription_1');
+                    // buy
+                    inappbilling.buy(function(purchase) {
+                        expect(purchase.productId).toEqual('test_subscription_1');
 
-                    // re-init plugin
-                    inappbilling.init(function() {
+                        // re-init plugin
+                        inappbilling.init(function() {
 
-                        // get purchases
-                        inappbilling.getPurchases(function(purchases) {
-                            expect(purchases).toBeArray();
-                            expect(purchases.length).toBeGreaterThan(1);
-                            expect(purchases[purchases.length - 1]).toImplement(PurchaseObject);
-                            expect(purchases[purchases.length - 1].productId).toEqual('test_subscription_1');
+                            // get purchases
+                            inappbilling.getPurchases(function(purchases) {
+                                expect(purchases).toBeArray();
+                                expect(purchases.length).toBeGreaterThan(1);
+                                expect(purchases[purchases.length - 1]).toImplement(PurchaseObject);
+                                expect(purchases[purchases.length - 1].productId).toEqual('test_subscription_1');
 
-                            done();
+                                done();
+
+                            }, function() {
+                                fail();
+                                done();
+
+                            }, purchase.id);
 
                         }, function() {
                             fail();
                             done();
 
-                        }, purchase.id);
+                        }, {}, 'test_subscription_1');
 
                     }, function() {
                         fail();
                         done();
-
-                    }, {}, 'test_subscription_1');
+                    }, 'test_subscription_1');
 
                 }, function() {
                     fail();
                     done();
                 }, 'test_subscription_1');
-
-            }, function() {
-                fail();
-                done();
-            }, 'test_subscription_1');
-        });
+            });
+        }
 
         it('should be able to get purchases from multiple payments', function(done) {
             /* sorry to break test independency, but at this point we have 
@@ -915,8 +927,10 @@ describe('InAppBilling', function() {
                 expect(purchases[purchases.length - 2]).toImplement(PurchaseObject);
                 expect(purchases[purchases.length - 2].productId).toEqual('test_product_1');
 
-                expect(purchases[purchases.length - 1]).toImplement(PurchaseObject);
-                expect(purchases[purchases.length - 1].productId).toEqual('test_subscription_1');
+                if (!!testSubscriptions) {
+                    expect(purchases[purchases.length - 1]).toImplement(PurchaseObject);
+                    expect(purchases[purchases.length - 1].productId).toEqual('test_subscription_1');
+                }
 
                 done();
 
@@ -1122,5 +1136,4 @@ describe('InAppBilling', function() {
         });
 
     });
-
 });
