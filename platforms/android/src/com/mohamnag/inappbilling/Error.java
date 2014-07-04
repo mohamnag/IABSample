@@ -17,7 +17,7 @@ import org.json.JSONObject;
  *
  * @author mohamang
  */
-public class ErrorEvent {
+public class Error {
 
     private static final String KEY_NAME_MESSAGE = "msg";
     private static final String KEY_NAME_ERROR = "errorCode";
@@ -25,7 +25,7 @@ public class ErrorEvent {
     private final String message;
     private final int errorCode;
     
-    public ErrorEvent(int errorCode, String message) {
+    public Error(int errorCode, String message) {
         this.errorCode = errorCode;
         this.message = message;
     }

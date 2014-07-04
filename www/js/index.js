@@ -72,7 +72,7 @@
     getPurchases: function() {
         inappbilling.getPurchases(
             function(purchases) {
-                app.log('get purchases succeed', pruchases);
+                app.log('get purchases succeed', purchases);
             },
             function(err) {
                 app.log('get purchases failed', err);
@@ -80,7 +80,7 @@
         );
     },
     getAvailableProducts: function() {
-        inappbilling.getAvailableProducts(
+        inappbilling.getLoadedProducts(
             function(prods) {
                 app.log('load products succeed', prods);
             },
@@ -101,7 +101,7 @@
         );
     },
     consProd1: function() {
-        inappbilling.consumePurchase(
+        inappbilling.consumeProduct(
             function(data) {
                 app.log('succeed consuming "test_product_1"', data);
             },
@@ -123,7 +123,7 @@
         );
     },
     consProd2: function() {
-        inappbilling.consumePurchase(
+        inappbilling.consumeProduct(
             function(data) {
                 app.log('succeed consuming "test_product_1"', data);
             },

@@ -1,7 +1,5 @@
 package com.mohamnag.inappbilling.helper;
 
-import com.mohamnag.inappbilling.ErrorEvent;
-import com.mohamnag.inappbilling.InAppBillingPlugin;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -41,6 +39,16 @@ public class Inventory {
     public Purchase getPurchase(String sku) {
         return mPurchaseMap.get(sku);
     }
+    
+    public Purchase getPurchaseByOrderId(String id) {
+        for(Purchase purchase : mPurchaseMap.values()) {
+            if(id.equals(purchase.getOrderId())) {
+                return purchase;
+            }
+        }
+        
+        return null;
+    }
 
     /**
      * Returns whether or not there exists a purchase of the given product.
@@ -67,6 +75,14 @@ public class Inventory {
     public void erasePurchase(String sku) {
         if (mPurchaseMap.containsKey(sku)) {
             mPurchaseMap.remove(sku);
+        }
+    }
+    
+    public void erasePurchaseByOrderId(String id) {
+        for(Purchase purchase : mPurchaseMap.values()) {
+            if(id.equals(purchase.getOrderId())) {
+                mPurchaseMap.remove(purchase.getSku());
+            }
         }
     }
 

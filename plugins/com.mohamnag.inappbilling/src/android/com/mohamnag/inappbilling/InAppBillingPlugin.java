@@ -69,6 +69,10 @@ public class InAppBillingPlugin extends CordovaPlugin {
     public static final int ERR_PRODUCT_NOT_LOADED = ERROR_CODES_BASE + 21;
     // invalid product ids passed
     public static final int ERR_INVALID_PRODUCT_ID = ERROR_CODES_BASE + 22;
+    // invalid purchase id passed
+    public static final int ERR_INVALID_PURCHASE_ID = ERROR_CODES_BASE + 23;
+    // item requested to be bought is already owned
+    public static final int ERR_PURCHASE_OWNED_ITEM = ERROR_CODES_BASE + 24;
 
     // play store response codes 
     public static final int BILLING_RESPONSE_RESULT_OK = 0;
@@ -135,11 +139,15 @@ public class InAppBillingPlugin extends CordovaPlugin {
         // Initialize
         if ("init".equals(action)) {
             ArrayList<String> productIds = null;
+            boolean debugEnabled = false;
             if (data.length() > 0) {
                 productIds = jsonStringToList(data.getString(0));
             }
+            if (data.length() > 1) {
+                debugEnabled = data.getBoolean(1);
+            }
 
-            init(productIds, callbackContext);
+            init(productIds, debugEnabled, callbackContext);
         } // Get the list of purchases
         else if ("getPurchases".equals(action) || "restoreCompletedTransactions".equals(action)) {
             if (isReady(callbackContext)) {
@@ -166,6 +174,11 @@ public class InAppBillingPlugin extends CordovaPlugin {
         else if ("loadProductDetails".equals(action)) {
             if (isReady(callbackContext)) {
                 loadProductDetails(jsonStringToList(data.getString(0)), callbackContext);
+            }
+        } // Get verification payload for a puchase
+        else if ("getPurchaseDetails".equals(action)) {
+            if (isReady(callbackContext)) {
+                getPurchaseDetails(data.getString(0), callbackContext);
             }
         } // No handler for the action
         else {
@@ -212,7 +225,7 @@ public class InAppBillingPlugin extends CordovaPlugin {
      * @param productIds
      * @param callbackContext
      */
-    private void init(final ArrayList<String> productIds, final CallbackContext callbackContext) {
+    private void init(final ArrayList<String> productIds, boolean debugEnabled, final CallbackContext callbackContext) {
 
         jsLog("init called with productIds: " + productIds);
 
@@ -240,7 +253,7 @@ public class InAppBillingPlugin extends CordovaPlugin {
                     jsLog("check for in-app billing v3 support");
                     int response = iabService.isBillingSupported(3, cordova.getActivity().getPackageName(), BILLING_ITEM_TYPE_INAPP);
                     if (response != BILLING_RESPONSE_RESULT_OK) {
-                        callbackContext.error(new ErrorEvent(
+                        callbackContext.error(new Error(
                                 ERR_SETUP,
                                 "Billing v3 not supported. Response code: " + response
                         ).toJavaScriptJSON());
@@ -259,14 +272,14 @@ public class InAppBillingPlugin extends CordovaPlugin {
                     }
                 }
                 catch (JSONException ex) {
-                    callbackContext.error(new ErrorEvent(
+                    callbackContext.error(new Error(
                             ERR_JSON_CONVERSION_FAILED,
                             ex.getMessage()
                     ).toJavaScriptJSON());
                 }
                 catch (RemoteException ex) {
                     Logger.getLogger(InAppBillingPlugin.class.getName()).log(Level.SEVERE, null, ex);
-                    callbackContext.error(new ErrorEvent(
+                    callbackContext.error(new Error(
                             ERR_SETUP,
                             ex.getMessage()
                     ).toJavaScriptJSON());
@@ -291,7 +304,7 @@ public class InAppBillingPlugin extends CordovaPlugin {
      */
     private boolean isReady(CallbackContext callbackContext) throws JSONException {
         if (!initialized) {
-            callbackContext.error(new ErrorEvent(
+            callbackContext.error(new Error(
                     ERR_NOT_INITIALIZED,
                     "Plugin has not been initialized."
             ).toJavaScriptJSON());
@@ -315,22 +328,24 @@ public class InAppBillingPlugin extends CordovaPlugin {
 
         SkuDetails product = myInventory.getSkuDetails(productId);
         if (product == null) {
-            callbackContext.error(new ErrorEvent(
+            callbackContext.error(new Error(
                     ERR_PRODUCT_NOT_LOADED,
                     "Product intended to be bought has not been loaded."
             ).toJavaScriptJSON());
         }
         else if (BILLING_ITEM_TYPE_SUBS.equals(product.getType()) && !subscriptionSupported) {
-            callbackContext.error(new ErrorEvent(
+            callbackContext.error(new Error(
                     ERR_SUBSCRIPTION_NOT_SUPPORTED,
                     "Subscriptions are not supported"
             ).toJavaScriptJSON());
         }
         else {
-            this.cordova.setActivityResultCallback(this);
+            cordova.setActivityResultCallback(this);
             int requestCode = REQUEST_CODE_BASE++;
 
             try {
+                jsLog("Preparing purchase flow");
+
                 Bundle buyIntentBundle = iabService.getBuyIntent(
                         3,
                         cordova.getActivity().getPackageName(),
@@ -339,29 +354,46 @@ public class InAppBillingPlugin extends CordovaPlugin {
                         null
                 );
 
-                PendingIntent pendingIntent = buyIntentBundle.getParcelable("BUY_INTENT");
+                int response = buyIntentBundle.getInt("RESPONSE_CODE");
+                if (response == BILLING_RESPONSE_RESULT_OK) {
+                    PendingIntent pendingIntent = buyIntentBundle.getParcelable("BUY_INTENT");
 
-                pendingPurchaseCallbacks.put(requestCode, callbackContext);
+                    pendingPurchaseCallbacks.put(requestCode, callbackContext);
 
-                cordova.getActivity().startIntentSenderForResult(
-                        pendingIntent.getIntentSender(),
-                        requestCode,
-                        new Intent(),
-                        0,
-                        0,
-                        0
-                );
+                    cordova.getActivity().startIntentSenderForResult(
+                            pendingIntent.getIntentSender(),
+                            requestCode,
+                            new Intent(),
+                            0,
+                            0,
+                            0
+                    );
+
+                    jsLog("Purchase flow launched successfully");
+                }
+                else if(response == BILLING_RESPONSE_RESULT_ITEM_ALREADY_OWNED) {
+                    callbackContext.error(new Error(
+                            ERR_PURCHASE_OWNED_ITEM,
+                            "Item requested to be bought is already owned."
+                    ).toJavaScriptJSON());
+                }
+                else {
+                    callbackContext.error(new Error(
+                            ERR_PURCHASE_FAILED,
+                            "Could not get buy intent. Response code: " + response
+                    ).toJavaScriptJSON());
+                }
             }
             catch (RemoteException ex) {
                 Logger.getLogger(InAppBillingPlugin.class.getName()).log(Level.SEVERE, null, ex);
-                callbackContext.error(new ErrorEvent(
+                callbackContext.error(new Error(
                         ERR_PURCHASE_FAILED,
                         ex.getMessage()
                 ).toJavaScriptJSON());
             }
             catch (IntentSender.SendIntentException ex) {
                 Logger.getLogger(InAppBillingPlugin.class.getName()).log(Level.SEVERE, null, ex);
-                callbackContext.error(new ErrorEvent(
+                callbackContext.error(new Error(
                         ERR_PURCHASE_FAILED,
                         ex.getMessage()
                 ).toJavaScriptJSON());
@@ -380,8 +412,8 @@ public class InAppBillingPlugin extends CordovaPlugin {
     private void getPurchases(CallbackContext callbackContext) throws JSONException {
         jsLog("getPurchases called.");
 
-        ErrorEvent errorInapp = queryPurchases(BILLING_ITEM_TYPE_INAPP);
-        ErrorEvent errorSubs = queryPurchases(BILLING_ITEM_TYPE_SUBS);
+        Error errorInapp = queryPurchases(BILLING_ITEM_TYPE_INAPP);
+        Error errorSubs = queryPurchases(BILLING_ITEM_TYPE_SUBS);
 
         // call success only if we had no error
         if (errorInapp != null) {
@@ -395,8 +427,9 @@ public class InAppBillingPlugin extends CordovaPlugin {
         }
     }
 
-    private ErrorEvent queryPurchases(String itemType) {
-        ErrorEvent ret = null;
+    private Error queryPurchases(String itemType) {
+        Error ret = null;
+        jsLog("queryPurchases for type: " + itemType);
 
         try {
             Bundle ownedItems = iabService.getPurchases(3, cordova.getActivity().getPackageName(), itemType, null);
@@ -404,8 +437,11 @@ public class InAppBillingPlugin extends CordovaPlugin {
             int response = ownedItems.getInt("RESPONSE_CODE");
             if (response == BILLING_RESPONSE_RESULT_OK) {
                 ArrayList<String> purchaseDataList = ownedItems.getStringArrayList("INAPP_PURCHASE_DATA_LIST");
-                ArrayList<String> signatureList = ownedItems.getStringArrayList("INAPP_DATA_SIGNATURE");
+                ArrayList<String> signatureList = ownedItems.getStringArrayList("INAPP_DATA_SIGNATURE_LIST");
                 String continuationToken = ownedItems.getString("INAPP_CONTINUATION_TOKEN");
+
+                jsLog("Got purchases: " + purchaseDataList.size());
+                jsLog("Got signatures: " + signatureList.size());
 
                 for (int i = 0; i < purchaseDataList.size(); ++i) {
                     String purchaseData = purchaseDataList.get(i);
@@ -427,7 +463,7 @@ public class InAppBillingPlugin extends CordovaPlugin {
                         }
                     }
                     catch (JSONException e) {
-                        ret = new ErrorEvent(
+                        ret = new Error(
                                 ERR_JSON_CONVERSION_FAILED,
                                 e.getMessage()
                         );
@@ -440,7 +476,7 @@ public class InAppBillingPlugin extends CordovaPlugin {
         }
         catch (RemoteException ex) {
             Logger.getLogger(InAppBillingPlugin.class.getName()).log(Level.SEVERE, null, ex);
-            ret = new ErrorEvent(
+            ret = new Error(
                     ERR_LOAD_RECEIPTS,
                     ex.getMessage()
             );
@@ -461,7 +497,7 @@ public class InAppBillingPlugin extends CordovaPlugin {
             callbackContext.success(myInventory.getAllProductsJSON());
         }
         else {
-            callbackContext.error(new ErrorEvent(
+            callbackContext.error(new Error(
                     ERR_INVENTORY_NOT_LOADED,
                     "Inventory is not loaded."
             ).toJavaScriptJSON());
@@ -489,8 +525,8 @@ public class InAppBillingPlugin extends CordovaPlugin {
             querySkus.putStringArrayList("ITEM_ID_LIST", productIds);
 
             // do same query with both types to load all!
-            ErrorEvent errInapp = querySkuDetails(querySkus, BILLING_ITEM_TYPE_INAPP);
-            ErrorEvent errSubs = querySkuDetails(querySkus, BILLING_ITEM_TYPE_SUBS);
+            Error errInapp = querySkuDetails(querySkus, BILLING_ITEM_TYPE_INAPP);
+            Error errSubs = querySkuDetails(querySkus, BILLING_ITEM_TYPE_SUBS);
 
             // only call success if no error has happened
             if (errInapp != null) {
@@ -515,8 +551,8 @@ public class InAppBillingPlugin extends CordovaPlugin {
      * @param callbackContext
      * @throws RemoteException
      */
-    private ErrorEvent querySkuDetails(Bundle querySkus, String itemType) {
-        ErrorEvent ret = null;
+    private Error querySkuDetails(Bundle querySkus, String itemType) {
+        Error ret = null;
 
         try {
             Bundle skuDetailsInapp = iabService.getSkuDetails(
@@ -544,7 +580,7 @@ public class InAppBillingPlugin extends CordovaPlugin {
                 }
             }
             else {
-                ret = new ErrorEvent(
+                ret = new Error(
                         ERR_LOAD_INVENTORY,
                         "Cant load product details. Responce code: " + response
                 );
@@ -554,7 +590,7 @@ public class InAppBillingPlugin extends CordovaPlugin {
             Logger.getLogger(InAppBillingPlugin.class
                     .getName()).log(Level.SEVERE, null, ex);
 
-            ret = new ErrorEvent(
+            ret = new Error(
                     ERR_LOAD_INVENTORY,
                     ex.getMessage()
             );
@@ -579,20 +615,22 @@ public class InAppBillingPlugin extends CordovaPlugin {
                 int response = iabService.consumePurchase(3, cordova.getActivity().getPackageName(), purchase.getToken());
 
                 if (response == BILLING_RESPONSE_RESULT_OK) {
+                    myInventory.erasePurchaseByOrderId(purchase.getOrderId());
+
                     callbackContext.success(purchase.toJavaScriptJson());
                 }
             }
             catch (RemoteException ex) {
                 Logger.getLogger(InAppBillingPlugin.class.getName()).log(Level.WARNING, null, ex);
 
-                callbackContext.error(new ErrorEvent(
+                callbackContext.error(new Error(
                         ERR_CONSUMPTION_FAILED,
                         ex.getMessage()
                 ).toJavaScriptJSON());
             }
         }
         else {
-            callbackContext.error(new ErrorEvent(
+            callbackContext.error(new Error(
                     ERR_CONSUME_NOT_OWNED_ITEM,
                     "No purchase record found for product id: " + productId
             ).toJavaScriptJSON());
@@ -614,8 +652,8 @@ public class InAppBillingPlugin extends CordovaPlugin {
 
             if (resultCode == Activity.RESULT_OK && responseCode == BILLING_RESPONSE_RESULT_OK) {
                 if (purchaseData == null || dataSignature == null) {
-                    callbackContext.error(new ErrorEvent(
-                            ERR_PURCHASE_FAILED, 
+                    callbackContext.error(new Error(
+                            ERR_PURCHASE_FAILED,
                             "Empty purchase data or empty signature returned"
                     ).toJavaScriptJSON());
                 }
@@ -627,8 +665,8 @@ public class InAppBillingPlugin extends CordovaPlugin {
                         if (base64EncodedPublicKey != null
                             && !Security.verifyPurchase(base64EncodedPublicKey, purchaseData, dataSignature)) {
 
-                            callbackContext.error(new ErrorEvent(
-                                    ERR_PAYMENT_INVALID, 
+                            callbackContext.error(new Error(
+                                    ERR_PAYMENT_INVALID,
                                     "Signature verification failed"
                             ).toJavaScriptJSON());
                         }
@@ -642,26 +680,46 @@ public class InAppBillingPlugin extends CordovaPlugin {
                         }
                     }
                     catch (JSONException e) {
-                        callbackContext.error(new ErrorEvent(
-                                ERR_JSON_CONVERSION_FAILED, 
+                        callbackContext.error(new Error(
+                                ERR_JSON_CONVERSION_FAILED,
                                 e.getMessage()
                         ).toJavaScriptJSON());
                     }
                 }
             }
             else if (resultCode == Activity.RESULT_CANCELED) {
-                callbackContext.error(new ErrorEvent(
-                        ERR_PAYMENT_CANCELLED, 
+                callbackContext.error(new Error(
+                        ERR_PAYMENT_CANCELLED,
                         "Purchase cancelled by user."
                 ).toJavaScriptJSON());
             }
             else {
                 // unknown result, interpret as error
-                callbackContext.error(new ErrorEvent(
+                callbackContext.error(new Error(
                         ERR_PURCHASE_FAILED,
                         "Unknown result code from activity. ResultCode: " + resultCode + " ResponseCode: " + responseCode
                 ).toJavaScriptJSON());
             }
+        }
+    }
+
+    /**
+     * Will simply return the complete purchase data. This is mainly for iOS
+     * compatibility here.
+     *
+     * @param purchaseId
+     * @param callbackContext
+     */
+    private void getPurchaseDetails(String purchaseId, CallbackContext callbackContext) throws JSONException {
+        Purchase purchase = myInventory.getPurchaseByOrderId(purchaseId);
+        if (purchase != null) {
+            callbackContext.success(purchase.toJavaScriptJson());
+        }
+        else {
+            callbackContext.error(new Error(
+                    ERR_INVALID_PURCHASE_ID,
+                    "Purchase with that id could not be found"
+            ).toJavaScriptJSON());
         }
     }
 

@@ -76,7 +76,7 @@
 
         <!-- cordova plugin src files -->
         <source-file src="src/android/com/mohamnag/inappbilling/InAppBillingPlugin.java" target-dir="src/com/mohamnag/inappbilling" />
-        <source-file src="src/android/com/mohamnag/inappbilling/ErrorEvent.java" target-dir="src/com/mohamnag/inappbilling" />
+        <source-file src="src/android/com/mohamnag/inappbilling/Error.java" target-dir="src/com/mohamnag/inappbilling" />
 
 
         <!-- the code from marketbilling example: https://code.google.com/p/marketbilling/ -->

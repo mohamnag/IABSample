@@ -84,7 +84,7 @@ InAppBilling.prototype.ERR_INVALID_PRODUCT_ID = ERROR_CODES_BASE + 22;
  */
 InAppBilling.prototype.ERR_INVALID_PURCHASE_ID = ERROR_CODES_BASE + 23;
 
-/**
+/***
  * This function accepts and outputs all the logs, both from native and from JS
  * this is intended to make the debuging easier, you only need to have access to 
  * JS console output.
@@ -154,11 +154,12 @@ InAppBilling.prototype.init = function(success, fail, options, productIds) {
         }
     }
 
+    // TODO: the arguments to init should be checked on iOS again to accept show log
     if (hasProductIds) {
-        return cordova.exec(success, fail, "InAppBillingPlugin", "init", [productIds]);
+        return cordova.exec(success, fail, "InAppBillingPlugin", "init", [productIds, this.options.showLog]);
     } else {
         //No SKUs
-        return cordova.exec(success, fail, "InAppBillingPlugin", "init", []);
+        return cordova.exec(success, fail, "InAppBillingPlugin", "init", [[], this.options.showLog]);
     }
 };
 
@@ -187,6 +188,11 @@ InAppBilling.prototype.init = function(success, fail, options, productIds) {
  * - consumable products which has been consumed
  * - products which have been cancelled (as possible in iOS)
  * - subscriptions that are expired
+ * 
+ * Because of the differences between purchase verification on iOS and android,
+ * the verification payload may not be set here. If you need that piece of data
+ * reliably on both iOS and andoird, you may ask [getPurchaseDetails]{@link module:InAppBilling#getPurchaseDetails}
+ * for full data.
  * 
  * This is best practice to always look at this list on startup to activate 
  * products in your application.
@@ -218,7 +224,7 @@ InAppBilling.prototype.getPurchases = function(success, fail) {
  */
 InAppBilling.prototype.buy = function(success, fail, productId) {
     this.log('buy called!');
-    
+
     // TODO: verify the return values to success in iOS native
     return cordova.exec(success, fail, "InAppBillingPlugin", "buy", [productId]);
 };
@@ -246,6 +252,7 @@ InAppBilling.prototype.buy = function(success, fail, productId) {
 InAppBilling.prototype.restore = function(success, fail) {
     this.log('restore called!');
 
+    // TODO: replace this on iOS with getPurchases and then remove this
     cordova.exec(success, fail, "InAppBillingPlugin", 'restoreCompletedTransactions', []);
 };
 
@@ -363,18 +370,29 @@ InAppBilling.prototype.loadProductDetails = function(success, fail, productIds) 
 };
 
 /**
- * This will return a verification payload for one purchase. Depending on the 
- * platform it means either the `purchaseToken` of one single purchase (on 
- * PlayStore) or the application `receipt` (on iTunes).
- * 
- * @param {type} success
- * @param {type} fail
- * @param {type} purchaseId
+ * This is the success callback for [getPurchaseDetails]{@link module:InAppBilling#getPurchaseDetails}.
+ * This will return the purchase data containing the verification payload.
+ *
+ * @callback getPurchaseDetailsSuccessCallback
+ * @param {Purchase} purchase
  */
-InAppBilling.prototype.getVerificationPayload = function(success, fail, purchaseId) {
+
+/**
+ * This will return full data of a purchase including its verification payload. 
+ * Depending on the platform verification payload means either the `purchaseToken` 
+ * of one single purchase (on PlayStore) or the application `receipt` (on iTunes).
+ * 
+ * The puchase data should have been loaded before this call using [getPurchases]{@link module:InAppBilling#getPurchases}.
+ * 
+ * @param {getPurchaseDetailsSuccessCallback} success
+ * @param {errorCallback} fail
+ * @param {string} purchaseId
+ */
+InAppBilling.prototype.getPurchaseDetails = function(success, fail, purchaseId) {
     this.log('loadProductDetails called!');
 
-    // TODO: to be implemented in both iOS and android!
+    // TODO: to be implemented in iOS!
+    return cordova.exec(success, fail, "InAppBillingPlugin", "getPurchaseDetails", [purchaseId]);
 };
 
 module.exports = new InAppBilling();
