@@ -129,7 +129,7 @@ describe('InAppBilling', function() {
     };
 
     // a purchase data just after being bought
-    var NewPurchaseObject = {
+    var FullPurchaseObject = {
         id: "",
         originalId: "",
         productId: "",
@@ -632,7 +632,7 @@ describe('InAppBilling', function() {
 
                 inappbilling.buy(function(purchase) {
                     expect(purchase).toBeDefined();
-                    expect(purchase).toImplement(NewPurchaseObject);
+                    expect(purchase).toImplement(FullPurchaseObject);
                     expect(purchase.productId).toEqual('test_product_1');
 
                     done();
@@ -657,7 +657,7 @@ describe('InAppBilling', function() {
 
                     inappbilling.buy(function(purchase) {
                         expect(purchase).toBeDefined();
-                        expect(purchase).toImplement(NewPurchaseObject);
+                        expect(purchase).toImplement(FullPurchaseObject);
                         expect(purchase.productId).toEqual('test_subscription_1');
 
                         done();
@@ -702,7 +702,7 @@ describe('InAppBilling', function() {
 
     });
 
-    describe('getVerificationPayload', function() {
+    describe('getPurchaseDetails', function() {
 
         beforeEach(function(done) {
             // we definitly need a working but empty plugin!
@@ -733,9 +733,10 @@ describe('InAppBilling', function() {
                     inappbilling.init(function() {
 
                         // get verification payload for the purchase
-                        inappbilling.getVerificationPayload(function(payload) {
-                            expect(payload).toBeDefined();
-                            expect(payload).toEqual(orgPayload);
+                        inappbilling.getPurchaseDetails(function(purchase) {
+                            expect(purchase).toBeDefined();
+                            expect(purchase).toImpelement(FullPurchaseObject);
+                            expect(purchase.verificationPayload).toEqual(orgPayload);
 
                             done();
 
@@ -776,7 +777,7 @@ describe('InAppBilling', function() {
                     inappbilling.init(function() {
 
                         // get verification payload
-                        inappbilling.getVerificationPayload(function() {
+                        inappbilling.verificationPayload(function() {
                             fail();
                             done();
 
@@ -980,7 +981,7 @@ describe('InAppBilling', function() {
         });
 
     });
-
+    
     describe('consumeProduct', function() {
 
         it('should not allow cunsumption of a not owned product', function(done) {
