@@ -1,12 +1,13 @@
 /**
  * In App Billing Plugin
- * 
- * Details and more information under: https://github.com/mohamnag/InAppBilling/wiki
+ *
+ * Details and more information under:
+ * https://github.com/mohamnag/InAppBilling/wiki
  */
-
 package com.mohamnag.inappbilling;
 
-import com.mohamnag.inappbilling.helper.IabResult;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -17,19 +18,28 @@ import org.json.JSONObject;
  * @author mohamang
  */
 public class ErrorEvent {
-    private static final String msgKey = "msg";
-    private static final String errorCodeKey = "errorCode";
-    private static final String nativeEventKey = "nativeEvent";
+
+    private static final String KEY_NAME_MESSAGE = "msg";
+    private static final String KEY_NAME_ERROR = "errorCode";
+
+    private final String message;
+    private final int errorCode;
     
-    public static JSONObject buildJson(int errorCode, String msg, IabResult result) throws JSONException {
+    public ErrorEvent(int errorCode, String message) {
+        this.errorCode = errorCode;
+        this.message = message;
+    }
+    
+    public JSONObject toJavaScriptJSON() {
         JSONObject ret = new JSONObject();
-        ret.put(errorCodeKey, errorCode);
-        ret.put(msgKey, msg);
-        
-        if(result != null) {
-            ret.put(nativeEventKey, result.toJson());
+        try {
+            ret.put(KEY_NAME_ERROR, errorCode);
+            ret.put(KEY_NAME_MESSAGE, message);
         }
-        
+        catch (JSONException ex) {
+            Logger.getLogger(InAppBillingPlugin.class.getName()).log(Level.WARNING, null, ex);
+        }
+
         return ret;
     }
 }

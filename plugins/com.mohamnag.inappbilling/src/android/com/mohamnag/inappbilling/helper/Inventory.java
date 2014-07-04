@@ -1,5 +1,7 @@
 package com.mohamnag.inappbilling.helper;
 
+import com.mohamnag.inappbilling.ErrorEvent;
+import com.mohamnag.inappbilling.InAppBillingPlugin;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -15,8 +17,10 @@ public class Inventory {
 
     Map<String, SkuDetails> mSkuMap = new HashMap<String, SkuDetails>();
     Map<String, Purchase> mPurchaseMap = new HashMap<String, Purchase>();
+    String base64EncodedPublicKey;
 
-    public Inventory() {
+    public Inventory(String licenceKey) {
+        base64EncodedPublicKey = licenceKey;
     }
 
     /**
@@ -25,7 +29,7 @@ public class Inventory {
     public SkuDetails getSkuDetails(String sku) {
         return mSkuMap.get(sku);
     }
-    
+
     public void addSkuDetails(SkuDetails sku) {
         mSkuMap.put(sku.getSku(), sku);
     }
@@ -79,7 +83,7 @@ public class Inventory {
     List<String> getAllOwnedSkus(String itemType) {
         List<String> result = new ArrayList<String>();
         for (Purchase p : mPurchaseMap.values()) {
-            if (p.getItemType().equals(itemType)) {
+            if (mSkuMap.get(p.getSku()).getType().equals(itemType)) {
                 result.add(p.getSku());
             }
         }
@@ -89,7 +93,7 @@ public class Inventory {
     /**
      * Returns a list of all purchases.
      */
-    public List<Purchase> getAllPurchases() {
+    public ArrayList<Purchase> getAllPurchases() {
         return new ArrayList<Purchase>(mPurchaseMap.values());
     }
 
@@ -102,22 +106,36 @@ public class Inventory {
 
     /**
      * Builds up a JSON array of products loaded in inventory
-     * 
-     * @return 
+     *
+     * @return
      */
     public JSONArray getAllProductsJSON() throws JSONException {
         JSONArray jsonProductDetailsList = new JSONArray();
         for (SkuDetails product : mSkuMap.values()) {
             jsonProductDetailsList.put(product.toJson());
         }
-        
+
         return jsonProductDetailsList;
     }
     
+    /**
+     * Builds up a JSON array of purchases loaded in inventory
+     *
+     * @return
+     */
+    public JSONArray getAllPurchasesJSON() throws JSONException {
+        JSONArray jsonProductDetailsList = new JSONArray();
+        for (Purchase purchase : mPurchaseMap.values()) {
+            jsonProductDetailsList.put(purchase.toJavaScriptJson());
+        }
+
+        return jsonProductDetailsList;
+    }
+
     public int getProductCount() {
         return mSkuMap.size();
     }
-    
+
     public int getPurchaseCount() {
         return mPurchaseMap.size();
     }

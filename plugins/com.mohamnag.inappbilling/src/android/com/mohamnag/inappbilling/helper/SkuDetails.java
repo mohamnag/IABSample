@@ -1,5 +1,6 @@
 package com.mohamnag.inappbilling.helper;
 
+import com.mohamnag.inappbilling.InAppBillingPlugin;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -20,7 +21,7 @@ public class SkuDetails {
     String currency;
 
     public SkuDetails(String jsonSkuDetails) throws JSONException {
-        this(IabHelper.ITEM_TYPE_INAPP, jsonSkuDetails);
+        this(InAppBillingPlugin.BILLING_ITEM_TYPE_INAPP, jsonSkuDetails);
     }
 
     public SkuDetails(String itemType, String json) throws JSONException {

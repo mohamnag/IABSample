@@ -81,9 +81,6 @@
 
         <!-- the code from marketbilling example: https://code.google.com/p/marketbilling/ -->
         <source-file src="src/android/com/mohamnag/inappbilling/helper/Purchase.java" target-dir="src/com/mohamnag/inappbilling/helper/" />
-        <source-file src="src/android/com/mohamnag/inappbilling/helper/IabException.java" target-dir="src/com/mohamnag/inappbilling/helper/" />
-        <source-file src="src/android/com/mohamnag/inappbilling/helper/IabHelper.java" target-dir="src/com/mohamnag/inappbilling/helper/" />
-        <source-file src="src/android/com/mohamnag/inappbilling/helper/IabResult.java" target-dir="src/com/mohamnag/inappbilling/helper/" />
         <source-file src="src/android/com/mohamnag/inappbilling/helper/Base64.java" target-dir="src/com/mohamnag/inappbilling/helper/" />
         <source-file src="src/android/com/mohamnag/inappbilling/helper/Base64DecoderException.java" target-dir="src/com/mohamnag/inappbilling/helper/" />
         <source-file src="src/android/com/mohamnag/inappbilling/helper/Inventory.java" target-dir="src/com/mohamnag/inappbilling/helper/" />

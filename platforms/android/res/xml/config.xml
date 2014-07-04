@@ -27,7 +27,7 @@
     <preference name="disable-cursor" value="false" />
     <preference name="android-minSdkVersion" value="7" />
     <preference name="android-installLocation" value="auto" />
-    <gap:plugin name="com.mohamnag.inappbilling" version="0.0.1" />
+    <gap:plugin name="com.mohamnag.inappbilling" version="0.0.2" />
     <preference name="android-iabplugin-license-key" value="MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA25Xe5A22kONtxZ7N1qnLa/64nzZ+ICBf58mS9JlEwZfPj6VD4vBk5DqeE5s5tdfwZc1gVlYg/I43UanGGW5ez40izWM8deHVf6MnqgeC01ZT3R7t+IG2Mvg5ZET3iri4xyOI78kerfmDNtJFLPIZmA09UgJe+1l7pRIfBS/ciugsVTS3wbXoHQTCk1T1PBCpJgnJqGa2yNuhQY7AlzbEA5GNXsvZUk3FJOMJ/RSqEsIRDCaQlt1P0iisiCd/TV1dSv7vNvpCNf9lMmGT8CRFJq/AhBCaXlJNekjPrf4Uxam1w+yJvA1j3tpphxo6CCwq1KQd1vV+Lj4p0aa3Xz1GNQIDAQAB" />
     <icon src="icon.png" />
     <icon gap:density="ldpi" gap:platform="android" src="res/icon/android/icon-36-ldpi.png" />

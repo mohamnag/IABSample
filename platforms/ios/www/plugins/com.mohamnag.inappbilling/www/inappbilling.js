@@ -18,9 +18,6 @@ cordova.define("com.mohamnag.inappbilling.InAppBilling", function(require, expor
  * @param {Object}  error   the information about the error
  * @param {int}     error.errorCode one of the error codes defined with ERR_*
  * @param {string}  error.msg   a textual message intended for developer in order to make debuging easier
- * @param {Object}  error.nativeEvent additional    information mainly intended for debug process which will not be present if the source of error is not IAB
- * @param {int}     error.nativeEvent.IabResponse   response code coming from IabHelper
- * @param {string}  error.nativeEvent.IabMessage    message text coming from IabHelper
  */
 
 var noop = function() {
@@ -311,6 +308,7 @@ InAppBilling.prototype.consumeProduct = function(success, fail, productId) {
  * @param {errorCallback} fail  callback for failed query
  */
 InAppBilling.prototype.getLoadedProducts = function(success, fail) {
+    // TODO: remove this and use simply the loadProductDetails
     this.log('getLoadedProducts called!');
 
     //TODO: implement this for iOS!
@@ -331,9 +329,7 @@ InAppBilling.prototype.getLoadedProducts = function(success, fail) {
 /**
  * Get details for a list of product ids. This will also load the products' 
  * details if they are not already loaded. Will only return the product details
- * for the **valid product ids** from the requested list. Will not return the items
- * which have been loaded before. Use [getLoadedProducts]{@link module:InAppBilling#getLoadedProducts}
- * to get the complete list of all products loaded ever.
+ * for the valid product ids. Will also return the items which have been loaded 
  * 
  * @param {loadProductDetailsSuccessCallback} success    callback for successful query
  * @param {errorCallback} fail  callback for failed query

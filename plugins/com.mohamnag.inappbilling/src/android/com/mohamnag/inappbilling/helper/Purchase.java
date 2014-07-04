@@ -8,7 +8,6 @@ import org.json.JSONObject;
  */
 public class Purchase {
 
-    String mItemType;  // ITEM_TYPE_INAPP or ITEM_TYPE_SUBS
     String mOrderId;
     String mPackageName;
     String mSku;
@@ -19,8 +18,7 @@ public class Purchase {
     String mOriginalJson;
     String mSignature;
 
-    public Purchase(String itemType, String jsonPurchaseInfo, String signature) throws JSONException {
-        mItemType = itemType;
+    public Purchase(String jsonPurchaseInfo, String signature) throws JSONException {
         mOriginalJson = jsonPurchaseInfo;
         JSONObject o = new JSONObject(mOriginalJson);
         mOrderId = o.optString("orderId");
@@ -31,10 +29,6 @@ public class Purchase {
         mDeveloperPayload = o.optString("developerPayload");
         mToken = o.optString("token", o.optString("purchaseToken"));
         mSignature = signature;
-    }
-
-    public String getItemType() {
-        return mItemType;
     }
 
     public String getOrderId() {
@@ -75,6 +69,21 @@ public class Purchase {
 
     @Override
     public String toString() {
-        return "PurchaseInfo(type:" + mItemType + "):" + mOriginalJson;
+        return "PurchaseInfo(product id:" + mSku + "):" + mOriginalJson;
+    }
+    
+    /**
+     * This returns a JSON object which complies to the JS structure definition
+     * @return 
+     */
+    public JSONObject toJavaScriptJson() throws JSONException {
+        JSONObject obj = new JSONObject();
+        obj.put("id", getOrderId());
+        obj.put("originalId", ""); // iOS only, but to keep the compatibility
+        obj.put("productId", getSku());
+        obj.put("expirationDate", ""); // TODO: can we get it from store?
+        obj.put("verificationPayload", getSignature());
+        
+        return obj;
     }
 }
